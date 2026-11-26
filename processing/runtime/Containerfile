@@ -1,0 +1,19 @@
+FROM localhost/agent-training-lab-base:pi-1.6.0
+WORKDIR /opt/relay/processing
+COPY processing/package.json processing/package-lock.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+COPY processing/bin/ bin/
+COPY processing/scripts/ scripts/
+COPY processing/docs/ docs/
+COPY docs/ /opt/relay/docs/
+COPY .agents/skills/relay/ /opt/relay/.agents/skills/relay/
+RUN ln -s /opt/relay/processing/bin/relay.mjs /usr/local/bin/relay \
+    && ln -s processing /opt/relay/reading-lab \
+    && mkdir -p /work/tools \
+    && ln -s /opt/relay /work/tools/relay \
+    && printf '%s\n' '{"workspace":"/work/task"}' > /opt/relay/task.json \
+    && chmod 0755 /work /work/tools /opt/relay/processing/bin/relay.mjs \
+    && chmod -R a+rX /opt/relay
+ENV RELAY_CONFIG_FILE=/opt/relay/task.json \
+    RELAY_SESSION_ROOT=/work/task
+WORKDIR /work/task

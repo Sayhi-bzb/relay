@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+__pycache__/
+src/content/sources/
+src/data/relay/

@@ -1,0 +1,9 @@
+[Unit]
+Description=Process collected releases and publish Relay articles
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.local/share/relay-site/publish.env
+ExecStart=%h/.local/share/relay-editor-runtime-v2/bin/node %h/.local/share/relay-site/app/deploy/publish.mjs
+TimeoutStartSec=30min
+UMask=0077

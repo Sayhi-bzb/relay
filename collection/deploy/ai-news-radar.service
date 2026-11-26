@@ -1,0 +1,14 @@
+[Unit]
+Description=Run one AI News Radar worker cycle
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+User=deploy
+SupplementaryGroups=docker
+UMask=0077
+WorkingDirectory=/opt/ai-news-radar
+Environment=DOCKER_CONFIG=/srv/ai-news-radar/docker
+ExecStart=/usr/bin/flock --nonblock /run/lock/ai-news-radar-worker.lock /usr/bin/docker compose --env-file /srv/ai-news-radar/.env --env-file /opt/ai-news-radar/.version -f /opt/ai-news-radar/compose.production.yml run --rm worker run
+TimeoutStartSec=25min

@@ -1,0 +1,11 @@
+[Unit]
+Description=Poll the AI News Radar work queue every 15 minutes
+
+[Timer]
+OnCalendar=*-*-* *:00/15:00
+Persistent=true
+RandomizedDelaySec=10
+Unit=ai-news-radar.service
+
+[Install]
+WantedBy=timers.target

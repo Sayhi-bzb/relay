@@ -1,0 +1,15 @@
+---
+import CellLayout from '../layouts/CellLayout.astro';
+import { site } from '../data/site';
+import { getProducts, getSources, sourceCard } from '../lib/sources';
+import type { BlogPageModel } from '../components/cell/model';
+
+const sources = await getSources();
+const model: BlogPageModel = {
+  kind: 'home', lang: 'en', title: site.title, description: site.description,
+  posts: sources.map(sourceCard),
+  products: getProducts(sources).map(({ name, slug }) => ({ name, href: `/products/${slug}/` })),
+};
+---
+
+<CellLayout model={model} />

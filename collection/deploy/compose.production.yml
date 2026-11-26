@@ -1,0 +1,14 @@
+name: ai-news-radar
+
+services:
+  worker:
+    image: ${AIDT_WORKER_IMAGE:?AIDT_WORKER_IMAGE is required}:${APP_VERSION:?APP_VERSION is required}
+    env_file:
+      - /srv/ai-news-radar/.env
+    environment:
+      OBSIDIAN_VAULT_PATH: /var/lib/ai-news-radar/vault
+    volumes:
+      - /srv/ai-news-radar/source.sqlite:/var/lib/ai-news-radar/source.sqlite
+      - /srv/ai-news-radar/obsidian-vault:/var/lib/ai-news-radar/vault
+    init: true
+    restart: "no"

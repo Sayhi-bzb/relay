@@ -1,0 +1,3 @@
+interface:
+  display_name: "Relay"
+  short_description: "Process article and chunk views with Relay"

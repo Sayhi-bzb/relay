@@ -1,0 +1,2158 @@
+import { CELL_SURFACE_GUARD_CELLS, CellPresentationRegistry } from "./browser-presentation.js";
+import { registerCellSurfaceGeometry } from "./browser-surface-geometry.js";
+export { CELL_SURFACE_GUARD_CELLS } from "./browser-presentation.js";
+export { CellOverlayHost, CellOverlayPortal, CellPopover, CellContextMenu, CellAlertDialog, positionCellOverlay } from "./browser-overlay-host.js";
+export type { CellOverlayDismissReason, CellOverlayPlacement } from "./browser-overlay-host.js";
+export { CellToastViewport, useCellToastState } from "./browser-toast.js";
+export type { CellToastEntry, CellToastState } from "./browser-toast.js";
+import { resolveCellFeedback, type CellFeedbackConfig } from "./feedback.js";
+/* eslint-disable react-refresh/only-export-components */
+import {
+  CELL_GRAPHICS_VERSION,
+  drawCharDeskCanvasRange,
+  resolveCharDeskCanvasGlyphSource,
+  getCharDeskCanvasFont,
+  loadCharDeskCanvasFonts,
+  measureCharDeskCanvasNerdGlyph,
+  presentCharDeskCellFrame,
+  prepareCharDeskCanvasSurface,
+  resolveCharDeskCanvasFontFace,
+  type CharDeskCanvasPalette,
+  type CharDeskFontProfile,
+} from "@chardesk/rendering/canvas";
+import { cellRectContainsPoint } from "@chardesk/cell-core";
+import {
+  createCharDeskRectRangeGeometry,
+  resolveCharDeskFontRoute,
+  type CharDeskCellMetrics,
+  type CharDeskCellRangePhase,
+} from "@chardesk/rendering";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ClipboardEvent,
+  type CSSProperties,
+  type FocusEvent,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactElement,
+  type ReactNode,
+} from "react";
+import {
+  commandForInput,
+  dismissCommandForFocusExit,
+  primarySemanticAction,
+  revealCommandForTarget,
+  textEditorAtPoint,
+  resolveWheelInput,
+  type WidgetCommand,
+} from "./interaction.js";
+import { EventManager, type CellEventHandlerMap } from "./events.js";
+import { getEventPath, hitTest, hitTestCell, intersectSceneRects } from "./scene.js";
+import { useSurfaceFocus } from "./browser-focus.js";
+import { useCellFontMetrics } from "./browser-font-metrics.js";
+import { createCellUiFontProfile } from "./browser-font-profile.js";
+import { useCellFontAudit } from "./browser-font-audit.js";
+export { DEFAULT_CELL_UI_METRICS, loadCellFontMetrics } from "./browser-font-metrics.js";
+import {
+  type GestureSignal,
+} from "./gestures.js";
+import { CellInteractionController, sameWidgetIdSet } from "./interaction-controller.js";
+import { CellTextInputLayer } from "./browser-input.js";
+import { ariaDescribedBy } from "./browser-aria.js";
+import { keyInputFromKeyboardEvent } from "./keyboard/browser.js";
+import { isCellKeyPress } from "./keyboard.js";
+import { useCellRangeState } from "./browser-range.js";
+import { offsetAtCellPoint } from "./text.js";
+import {
+  createCellRangeSnapshot,
+  createCellLinearRangeSnapshot,
+  equalCellRangeSnapshot,
+  type CellRangeCommand,
+  type CellRangeSnapshot,
+} from "./range.js";
+import type { RootProps } from "./react.js";
+import { captureCellProbe, formatCellBuffer, type CellProbeOptions } from "./probe.js";
+import type { CellProbePresentation, CellProbeSnapshot } from "./probe.js";
+import { CellUiRuntime } from "./runtime.js";
+import { createCellUiRenderFrame } from "./frame.js";
+import type { CellBuffer } from "./buffer.js";
+import { paintReorderPreview, type ReorderDrag } from "./reorder-preview.js";
+import { textViewportCommands } from "./text-viewport.js";
+import { scrollViewportCommands } from "./scroll.js";
+import { usePointerAppearance } from "./browser-hover.js";
+import { pressTargetAtPoint } from "./press.js";
+import { CellCursorPresenter } from "./browser-cursor.js";
+import { resolveCellPresentationWindow } from "./browser-presentation-window.js";
+import { isDescendantOf, sameWidgetValue } from "./tree.js";
+import { INDETERMINATE_PROGRESS_STEP_MS } from "./progress.js";
+import { useCellTooltipTarget } from "./browser-tooltip.js";
+import {
+  commandForGestureSignal,
+  gestureCandidatesForFrame,
+  validGestureCandidate,
+} from "./pointer.js";
+import { resolveCellUiTheme, type CellUiTheme, type CellUiThemeInput } from "./theme.js";
+import type { CellUiRecipe } from "./recipe.js";
+import type { CellUiPresentation } from "./presentation.js";
+export { readCellCssTheme, useCellCssTheme } from "./browser-theme.js";
+export type { CellCssTheme } from "./browser-theme.js";
+import { FixedVirtualGrid, type VirtualRange } from "./virtual.js";
+import type { CellListItem } from "./browser-collections.js";
+export { useCellRadioState } from "./browser-radio.js";
+export type { CellRadioItem, CellRadioOptions } from "./browser-radio.js";
+import type {
+  CellPoint,
+  CellRect,
+  CellSize,
+  FrameSnapshot,
+  SemanticNode,
+  SemanticAction,
+  SemanticSnapshot,
+  WidgetId,
+} from "./types.js";
+
+export { useCellTextState } from "./browser-input.js";
+export type { CellTextState } from "./browser-input.js";
+export { filterCellComboboxItems, useCellComboboxState } from "./browser-combobox.js";
+export type { CellComboboxItem, CellComboboxState } from "./browser-combobox.js";
+export { keyInputFromKeyboardEvent } from "./keyboard/browser.js";
+export { useCellRangeState } from "./browser-range.js";
+export type { CellRangeState } from "./browser-range.js";
+export { useCellScrollState } from "./browser-scroll.js";
+export type { CellScrollState } from "./browser-scroll.js";
+export {
+  useCellGridState,
+  useCellListState,
+  useCellMenuState,
+  useCellSelectState,
+  useCellTabsState,
+  useCellTreeState,
+} from "./browser-collections.js";
+export type {
+  CellGridCell,
+  CellGridRow,
+  CellGridState,
+  CellListItem,
+  CellListState,
+  CellMenuState,
+  CellSelectItem,
+  CellSelectState,
+  CellTabItem,
+  CellTabsState,
+  CellTreeItem,
+  CellTreeRow,
+  CellTreeState,
+} from "./browser-collections.js";
+
+export type CellVirtualListRow<Item extends CellListItem> = Readonly<{
+  item: Item;
+  index: number;
+}>;
+
+const nearestEnabledItemIndex = <Item extends CellListItem>(
+  items: readonly Item[],
+  desired: number,
+  range: VirtualRange,
+  direction: -1 | 1
+): number | null => {
+  if (range.start >= range.end) return null;
+  const start = Math.max(range.start, Math.min(range.end - 1, desired));
+  for (let index = start; index >= range.start && index < range.end; index += direction) {
+    if (!items[index]?.disabled) return index;
+  }
+  for (let index = start - direction; index >= range.start && index < range.end; index -= direction) {
+    if (!items[index]?.disabled) return index;
+  }
+  return null;
+};
+
+export type CellVirtualListState<Item extends CellListItem> = Readonly<{
+  rows: readonly CellVirtualListRow<Item>[];
+  focusedId: WidgetId | null;
+  selectedId: WidgetId | null;
+  scrollY: number;
+  totalHeight: number;
+  paddingTop: number;
+  rowHeight: number;
+  mountedCount: number;
+  cacheRange: VirtualRange;
+  dispatch: (command: WidgetCommand) => void;
+  reveal: (
+    id: WidgetId,
+    align?: "nearest" | "start" | "center" | "end"
+  ) => void;
+}>;
+
+export const useCellVirtualListState = <Item extends CellListItem>(
+  items: readonly Item[],
+  options: Readonly<{
+    scrollId: WidgetId;
+    viewportRows: number;
+    rowHeight?: number;
+    overscanRows?: number;
+    defaultFocusedId?: WidgetId;
+    defaultSelectedId?: WidgetId;
+    onAction?: (id: WidgetId) => void;
+  }>
+): CellVirtualListState<Item> => {
+  const [rowHeight] = useState(options.rowHeight ?? 1);
+  const [provider] = useState(() => new FixedVirtualGrid({
+    rows: items,
+    columnCount: 1,
+    getRowKey: (item: Item) => item.id,
+    viewport: { width: 1, height: options.viewportRows },
+    rowHeight,
+    overscanRows: options.overscanRows,
+    overscanColumns: 0,
+  }));
+  const itemsRef = useRef(items);
+  const viewportRowsRef = useRef(options.viewportRows);
+  const [focusedId, setFocusedId] = useState<WidgetId | null>(
+    options.defaultFocusedId ?? options.defaultSelectedId ?? null
+  );
+  const [selectedId, setSelectedId] = useState<WidgetId | null>(
+    options.defaultSelectedId ?? null
+  );
+
+  useLayoutEffect(() => {
+    if (itemsRef.current !== items) {
+      provider.setRows(items);
+      itemsRef.current = items;
+    }
+    if (viewportRowsRef.current !== options.viewportRows) {
+      provider.setViewport({ width: 1, height: options.viewportRows });
+      viewportRowsRef.current = options.viewportRows;
+    }
+  }, [items, options.viewportRows, provider]);
+  const snapshot = useSyncExternalStore(
+    useCallback((listener) => provider.subscribe(listener), [provider]),
+    useCallback(() => provider.snapshot(), [provider]),
+    useCallback(() => provider.snapshot(), [provider])
+  );
+  const reveal = useCallback((
+    id: WidgetId,
+    align: "nearest" | "start" | "center" | "end" = "nearest"
+  ) => {
+    provider.reveal(id, 0, align);
+  }, [provider]);
+  const dispatch = useCallback((command: WidgetCommand) => {
+    if (command.type === "scroll" && command.targetId === options.scrollId) {
+      const next = provider.scrollTo({ x: command.scrollX, y: command.scrollY });
+      const currentIndex = focusedId
+        ? itemsRef.current.findIndex((item) => item.id === focusedId)
+        : -1;
+      if (currentIndex < 0) return;
+      const direction = command.page?.direction
+        ?? (currentIndex < next.visibleRows.start ? 1 : -1);
+      const desired = command.page
+        ? currentIndex + direction * Math.max(1, Math.floor(command.page.cellCount / rowHeight))
+        : currentIndex < next.visibleRows.start
+          ? next.visibleRows.start
+          : currentIndex >= next.visibleRows.end
+            ? next.visibleRows.end - 1
+            : currentIndex;
+      if (desired === currentIndex && !itemsRef.current[currentIndex]?.disabled) return;
+      const searchRange = command.page
+        ? { start: 0, end: itemsRef.current.length }
+        : next.visibleRows;
+      const targetIndex = nearestEnabledItemIndex(
+        itemsRef.current,
+        desired,
+        searchRange,
+        direction
+      );
+      if (targetIndex === null) return;
+      const target = itemsRef.current[targetIndex]!;
+      setFocusedId(target.id);
+      if (targetIndex < next.visibleRows.start || targetIndex >= next.visibleRows.end) {
+        provider.reveal(target.id, 0, direction > 0 ? "end" : "start");
+      }
+      return;
+    }
+    if (command.type !== "focus" && command.type !== "activate") return;
+    if (!itemsRef.current.some((item) => item.id === command.targetId)) return;
+    setFocusedId(command.targetId);
+    if (command.type === "focus" && command.reveal?.targetId === options.scrollId) {
+      provider.scrollTo({ x: command.reveal.scrollX, y: command.reveal.scrollY });
+    }
+    if (command.type === "activate") {
+      setSelectedId(command.targetId);
+      options.onAction?.(command.targetId);
+    }
+  }, [focusedId, options, provider, rowHeight]);
+
+  return {
+    rows: snapshot.cells
+      .filter((cell) => cell.columnIndex === 0 && !cell.keptAlive)
+      .map((cell) => ({ item: cell.row, index: cell.rowIndex })),
+    focusedId,
+    selectedId,
+    scrollY: snapshot.scrollOffset.y,
+    totalHeight: snapshot.contentSize.height,
+    paddingTop: snapshot.cacheRows.start * rowHeight,
+    rowHeight,
+    mountedCount: snapshot.mountedCount,
+    cacheRange: snapshot.cacheRows,
+    dispatch,
+    reveal,
+  };
+};
+
+export const pxToCellPoint = (
+  point: Readonly<{ clientX: number; clientY: number }>,
+  bounds: Pick<DOMRect, "left" | "top">,
+  metrics: Pick<CharDeskCellMetrics, "cellWidth" | "cellHeight">,
+  guardCells = 0
+): CellPoint => ({
+  x: Math.floor((point.clientX - bounds.left) / metrics.cellWidth) - guardCells,
+  y: Math.floor((point.clientY - bounds.top) / metrics.cellHeight) - guardCells,
+});
+
+export const pxToCellPosition = (
+  point: Readonly<{ clientX: number; clientY: number }>,
+  bounds: Pick<DOMRect, "left" | "top">,
+  metrics: Pick<CharDeskCellMetrics, "cellWidth" | "cellHeight">,
+  guardCells = 0
+): CellPoint => ({
+  x: (point.clientX - bounds.left) / metrics.cellWidth - guardCells,
+  y: (point.clientY - bounds.top) / metrics.cellHeight - guardCells,
+});
+
+const presentFrame = (
+  canvas: HTMLCanvasElement,
+  frame: FrameSnapshot,
+  metrics: CharDeskCellMetrics,
+  palette: CharDeskCanvasPalette,
+  cellRange: CellRangeSnapshot | null,
+  cellRangePaintSpans: readonly CellRect[] | undefined,
+  rangePhase: CharDeskCellRangePhase,
+  theme: CellUiTheme,
+  fontProfile?: CharDeskFontProfile,
+  plane: Readonly<{
+    buffer?: CellBuffer;
+    viewport?: CellRect;
+    window?: CellRect;
+    transparent?: boolean;
+    transparentGuard?: boolean;
+  }> = {}
+): void => {
+  const context = canvas.getContext("2d");
+  if (!context) return;
+  const buffer = plane.buffer ?? frame.buffer;
+  const viewport = plane.viewport ?? frame.scene.viewport;
+  const window = plane.window ?? { x: 0, y: 0, width: buffer.width, height: buffer.height };
+  const visible = intersectSceneRects(viewport, window);
+  const guardX = CELL_SURFACE_GUARD_CELLS * metrics.cellWidth;
+  const guardY = CELL_SURFACE_GUARD_CELLS * metrics.cellHeight;
+  const width = (buffer.width + 2 * CELL_SURFACE_GUARD_CELLS) * metrics.cellWidth;
+  const height = (window.height + 2 * CELL_SURFACE_GUARD_CELLS) * metrics.cellHeight;
+  const dpr = Math.max(1, globalThis.devicePixelRatio || 1);
+  const regions = [visible];
+  // Font ink may cross Cell boundaries, so presentation repaints the whole
+  // visible window while the headless frame keeps precise invalidation data.
+  prepareCharDeskCanvasSurface(canvas, context, width, height, dpr);
+  if (!plane.transparent) {
+    context.fillStyle = palette.background;
+    if (plane.transparentGuard) context.fillRect(guardX, guardY,
+      buffer.width * metrics.cellWidth, window.height * metrics.cellHeight);
+    else context.fillRect(0, 0, width, height);
+  }
+  context.translate(guardX, guardY - window.y * metrics.cellHeight);
+  presentCharDeskCellFrame(
+    context,
+    createCellUiRenderFrame(frame, regions, { buffer, viewport: visible }),
+    {
+      metrics,
+      palette,
+      ...(fontProfile ? { fontProfile } : {}),
+    }
+  );
+  if (cellRange && (cellRangePaintSpans === undefined || cellRangePaintSpans.length > 0)) {
+    const paintSpans = cellRangePaintSpans ?? (cellRange.shape === "linear" ? cellRange.spans : null);
+    const geometry = paintSpans
+      ? { polygons: paintSpans.flatMap((span) => createCharDeskRectRangeGeometry(span).polygons) }
+      : createCharDeskRectRangeGeometry(cellRange.bounds);
+    drawCharDeskCanvasRange(context, {
+      geometry,
+      phase: rangePhase,
+      style: theme.rangeStyle,
+      options: { metrics, clipRegions: regions },
+    });
+  }
+};
+
+const presentFrameWithCursor = (
+  cursor: CellCursorPresenter,
+  canvas: HTMLCanvasElement,
+  frame: FrameSnapshot,
+  metrics: CharDeskCellMetrics,
+  palette: CharDeskCanvasPalette,
+  cellRange: CellRangeSnapshot | null,
+  cellRangePaintSpans: readonly CellRect[] | undefined,
+  rangePhase: CharDeskCellRangePhase,
+  theme: CellUiTheme,
+  fontProfile?: CharDeskFontProfile,
+  reorderDrag?: ReorderDrag | null,
+  transparentGuard = false,
+  window?: CellRect,
+) => {
+  const reorderBuffer = reorderDrag ? paintReorderPreview(frame, reorderDrag, theme) : null;
+  cursor.beforeBasePresent();
+  presentFrame(
+    canvas,
+    frame,
+    metrics,
+    palette,
+    cellRange,
+    cellRangePaintSpans,
+    rangePhase,
+    theme,
+    fontProfile,
+    { buffer: reorderBuffer ?? frame.baseBuffer, viewport: frame.scene.viewport, transparentGuard, window }
+  );
+  if (!cellRange) {
+    cursor.afterBasePresent({
+      frame,
+      metrics,
+      palette,
+      style: theme.cursorStyle,
+      originRow: window?.y ?? 0,
+      ...(fontProfile ? { fontProfile } : {}),
+    });
+  }
+};
+
+const hiddenSemanticStyle: CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clipPath: "inset(50%)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
+
+export const SemanticDom = ({
+  snapshot,
+  onAction,
+  showFocus,
+  probeState,
+}: Readonly<{
+  snapshot: SemanticSnapshot;
+  onAction: (targetId: WidgetId, action: SemanticAction) => void;
+  showFocus?: () => void;
+  probeState?: Readonly<{
+    hoveredId: WidgetId | null;
+    focusedId: WidgetId | null;
+    activeFocusId: WidgetId | null;
+    pressActiveId: WidgetId | null;
+    activationFlashId: WidgetId | null;
+    confirmationPhase: number | null;
+    focusVisible: boolean;
+    manipulating: boolean;
+  }>;
+}>) => {
+  const childrenByParent = useMemo(() => {
+    const index = new Map<WidgetId, SemanticNode[]>();
+    for (const node of snapshot.nodes.values()) {
+      if (node.hidden || node.semanticParentId === null) continue;
+      const children = index.get(node.semanticParentId);
+      if (children) children.push(node);
+      else index.set(node.semanticParentId, [node]);
+    }
+    for (const children of index.values()) {
+      children.sort((left, right) => left.traversalOrder - right.traversalOrder);
+    }
+    return index;
+  }, [snapshot]);
+  const childrenOf = (parentId: WidgetId) => childrenByParent.get(parentId) ?? [];
+  const renderNode = (node: SemanticNode): ReactNode => {
+    if (node.role === "textbox" || node.role === "combobox") return null;
+    const children = childrenOf(node.id);
+    const focusable = node.actions.includes("focus");
+    const primaryAction = primarySemanticAction(node);
+    const Element = node.role === "link" ? "a" : "div";
+    return (
+      <Element
+        id={`cell-semantic-${node.id}`}
+        key={node.id}
+        role={node.role}
+        aria-label={node.labelledById ? undefined : node.label}
+        aria-labelledby={node.labelledById
+          ? `cell-semantic-${node.labelledById}`
+          : undefined}
+        aria-controls={node.controlsId
+          ? `cell-semantic-${node.controlsId}`
+          : undefined}
+        aria-describedby={ariaDescribedBy(node)}
+        aria-activedescendant={node.activeDescendantId
+          ? `cell-semantic-${node.activeDescendantId}`
+          : undefined}
+        aria-selected={node.selected}
+        aria-current={node.current}
+        aria-expanded={node.expanded}
+        aria-haspopup={node.hasPopup}
+        aria-disabled={node.disabled || undefined}
+        aria-invalid={node.invalid || undefined}
+        aria-modal={node.role === "dialog" && node.modal ? true : undefined}
+        aria-orientation={node.orientation}
+        aria-level={node.level}
+        aria-rowindex={node.rowIndex}
+        aria-colindex={node.columnIndex}
+        aria-rowcount={node.rowCount}
+        aria-colcount={node.columnCount}
+        aria-posinset={node.positionInSet}
+        aria-setsize={node.setSize}
+        aria-checked={node.checked}
+        aria-pressed={node.pressed}
+        aria-valuenow={node.valueNow}
+        aria-valuemin={node.valueMin}
+        aria-valuemax={node.valueMax}
+        aria-valuetext={node.valueText}
+        data-focused={snapshot.focusedId === node.id || undefined}
+        data-cell-semantic-id={node.id}
+        data-cell-probe={node.probeId}
+        data-cell-hovered={node.probeId ? probeState?.hoveredId ?? undefined : undefined}
+        data-cell-focused={node.probeId ? probeState?.focusedId ?? undefined : undefined}
+        data-cell-active-focus={node.probeId ? probeState?.activeFocusId ?? undefined : undefined}
+        data-cell-press-active={node.probeId ? probeState?.pressActiveId ?? undefined : undefined}
+        data-cell-activation-flash={node.probeId ? probeState?.activationFlashId ?? undefined : undefined}
+        data-cell-confirmation-phase={node.probeId ? probeState?.confirmationPhase ?? undefined : undefined}
+        data-cell-focus-visible={node.probeId && probeState?.focusVisible ? true : undefined}
+        data-cell-manipulating={node.probeId && probeState?.manipulating ? true : undefined}
+        data-href={node.href}
+        href={node.role === "link" ? node.href : undefined}
+        target={node.role === "link" ? node.target : undefined}
+        rel={node.role === "link" && node.target === "_blank" ? "noopener noreferrer" : undefined}
+        tabIndex={focusable ? -1 : undefined}
+        onFocus={focusable
+          ? (event) => {
+              if (event.target !== event.currentTarget) return;
+              showFocus?.();
+              if (snapshot.focusedId !== node.id) {
+                onAction(node.id, "focus");
+              }
+            }
+          : undefined}
+        onClick={primaryAction
+          ? (event) => {
+              if (node.role === "link") event.preventDefault();
+              onAction(node.id, primaryAction);
+            }
+          : undefined}
+      >
+        {children.length > 0 ? children.map(renderNode) : node.label}
+      </Element>
+    );
+  };
+  const roots = snapshot.roots
+    .map((id) => snapshot.nodes.get(id))
+    .filter((node): node is SemanticNode => node !== undefined && !node.hidden);
+  return (
+    <div style={hiddenSemanticStyle} data-semantic-revision={snapshot.revision}>
+      {roots.map(renderNode)}
+    </div>
+  );
+};
+
+export type CellSurfaceProps = Readonly<{
+  viewport: CellSize;
+  overlayViewport?: CellSize;
+  children: ReactElement<RootProps>;
+  focusedId?: WidgetId | null;
+  theme?: CellUiThemeInput;
+  recipe?: CellUiRecipe;
+  presentation?: CellUiPresentation;
+  feedback?: Partial<CellFeedbackConfig>;
+  metrics?: CharDeskCellMetrics;
+  fontSize?: number;
+  fontProfile?: CharDeskFontProfile;
+  palette?: CharDeskCanvasPalette;
+  label?: string;
+  className?: string;
+  probeId?: string;
+  fontAudit?: boolean;
+  onCommand: (command: WidgetCommand) => void;
+  onHoverChange?: (targetId: WidgetId | null) => void;
+  linearSelection?: boolean;
+  cellRange?: CellRangeSnapshot | null;
+  /** Overrides range paint geometry without changing selection or copy semantics. */
+  cellRangePaintSpans?: readonly CellRect[];
+  onCellRangeCommand?: (command: CellRangeCommand) => void;
+  onSelectionGesture?: (gesture: Readonly<{
+    phase: "start" | "move" | "end";
+    shape: "linear" | "rectangle";
+    anchor: Readonly<{ x: number; y: number }>;
+    head: Readonly<{ x: number; y: number }>;
+    bounds: DOMRect;
+    buffer: CellBuffer;
+  }>) => void;
+  resolveSelectionCopyText?: (buffer: CellBuffer) => string | undefined;
+}>;
+
+export const CELL_SURFACE_PROBE_PROPERTY = "__chardeskCellProbeV5" as const;
+
+type CellProbeHost = HTMLElement & {
+  [CELL_SURFACE_PROBE_PROPERTY]?: CellProbeSnapshot;
+  __chardeskCaptureCellProbeV5?: (options: CellProbeOptions) => CellProbeSnapshot;
+};
+
+export const readCellSurfaceProbe = (element: Element, options?: CellProbeOptions): CellProbeSnapshot | null => {
+  const surface = element.matches("[data-cell-probe]")
+    ? element
+    : element.closest("[data-cell-probe]");
+  if (!surface) return null;
+  const host = surface as CellProbeHost;
+  return options ? host.__chardeskCaptureCellProbeV5?.(options) ?? null
+    : host[CELL_SURFACE_PROBE_PROPERTY] ?? null;
+};
+
+const CELL_PROBE_FONT_SAMPLES = {
+  display: "A",
+  "cell-glyph": "─",
+  cjk: "界",
+  nerd: "\ue0b0",
+  symbol: "∞",
+  emoji: "👋",
+} as const;
+
+const roundProbePixels = (value: number) => Math.round(value * 1000) / 1000;
+
+const captureCellProbePresentation = (
+  frame: FrameSnapshot,
+  canvas: HTMLCanvasElement,
+  metrics: CharDeskCellMetrics,
+  fontProfile?: CharDeskFontProfile
+): CellProbePresentation => {
+  const requestedFontRoutes = Object.fromEntries(
+    Object.entries(CELL_PROBE_FONT_SAMPLES).filter(([, text]) => resolveCharDeskCanvasGlyphSource(text) === "font").map(([capability, grapheme]) => {
+      const face = resolveCharDeskCanvasFontFace({
+        grapheme,
+        route: resolveCharDeskFontRoute(grapheme),
+        bold: false,
+        italic: false,
+        ...(fontProfile ? { fontProfile } : {}),
+      });
+      return [capability, {
+        family: face.family,
+        fontSize: metrics.fontSize * face.fontSizeScale,
+        baselineShiftEm: face.baselineShiftEm,
+        boldStrategy: face.boldStrategy,
+        boldOverdrawEm: face.boldOverdrawEm,
+      }];
+    })
+  ) as CellProbePresentation["requestedFontRoutes"];
+  const context = canvas.getContext("2d");
+  const glyphInkOverhang: Array<CellProbePresentation["glyphInkOverhang"][number]> = [];
+  const graphicCells: NonNullable<CellProbePresentation["cellGraphics"]>["cells"][number][] = [];
+  if (context && typeof context.measureText === "function") {
+    const measured = new Set<string>();
+    context.save();
+    try {
+      context.textAlign = "center";
+      for (let row = 0; row < frame.buffer.height; row += 1) {
+        for (let col = 0; col < frame.buffer.width; col += 1) {
+          const cell = frame.buffer.get(col, row);
+          if (!cell || cell.continuation || !cell.text.trim()) continue;
+          if (resolveCharDeskCanvasGlyphSource(cell.text) === "cell-graphics") {
+            graphicCells.push({ text: cell.text, codePoint: cell.text.codePointAt(0)!, row, col,
+              width: cell.width * metrics.cellWidth, height: metrics.cellHeight });
+            continue;
+          }
+          const bold = !!cell.style.bold;
+          const italic = !!cell.style.italic;
+          const key = `${bold}:${italic}:${cell.text}`;
+          if (measured.has(key)) continue;
+          measured.add(key);
+          const route = resolveCharDeskFontRoute(cell.text);
+          const face = resolveCharDeskCanvasFontFace({
+            grapheme: cell.text,
+            route,
+            bold,
+            italic,
+            ...(fontProfile ? { fontProfile } : {}),
+          });
+          context.font = getCharDeskCanvasFont(metrics, 1, {
+            bold,
+            route,
+            fontFamily: face.family,
+            fontSizeScale: face.fontSizeScale,
+            boldStrategy: face.boldStrategy,
+          });
+          const overdrawWidth = bold && face.boldStrategy === "overdraw"
+            ? face.boldOverdrawEm * metrics.fontSize * face.fontSizeScale
+            : 0;
+          const placement = face.capability === "nerd"
+            ? measureCharDeskCanvasNerdGlyph(context, { grapheme: cell.text, metrics,
+              bold, italic, ...(fontProfile ? { fontProfile } : {}) })
+            : null;
+          const measurement = placement ? null : context.measureText(cell.text);
+          const halfAdvance = (measurement?.width ?? 0) / 2;
+          let leftExtent = placement ? -placement.inkLeft : halfAdvance;
+          let rightExtent = placement ? placement.inkRight : halfAdvance;
+          if (measurement && Number.isFinite(measurement.actualBoundingBoxLeft)) {
+            leftExtent = measurement.actualBoundingBoxLeft;
+          }
+          if (measurement && Number.isFinite(measurement.actualBoundingBoxRight)) {
+            rightExtent = measurement.actualBoundingBoxRight;
+          }
+          rightExtent += overdrawWidth;
+          const allocatedLeft = col * metrics.cellWidth;
+          const allocatedRight = allocatedLeft + cell.width * metrics.cellWidth;
+          const center = (allocatedLeft + allocatedRight) / 2;
+          const inkLeft = center - leftExtent;
+          const inkRight = center + rightExtent;
+          const overhangLeft = Math.max(0, allocatedLeft - inkLeft);
+          const overhangRight = Math.max(0, inkRight - allocatedRight);
+          if (overhangLeft <= 0.5 && overhangRight <= 0.5) continue;
+          glyphInkOverhang.push({
+            text: cell.text,
+            row,
+            col,
+            spanCells: cell.width,
+            inkLeft: roundProbePixels(inkLeft),
+            inkRight: roundProbePixels(inkRight),
+            allocatedLeft: roundProbePixels(allocatedLeft),
+            allocatedRight: roundProbePixels(allocatedRight),
+            overhangLeft: roundProbePixels(overhangLeft),
+            overhangRight: roundProbePixels(overhangRight),
+          });
+        }
+      }
+    } finally {
+      context.restore();
+    }
+  }
+  return {
+    metrics: {
+      cellWidth: metrics.cellWidth,
+      cellHeight: metrics.cellHeight,
+      fontSize: metrics.fontSize,
+      ...(metrics.baseline === undefined ? {} : { baseline: metrics.baseline }),
+    },
+    fontProfileId: fontProfile?.id ?? "default",
+    requestedFontRoutes,
+    cellGraphics: { source: "cell-graphics", version: CELL_GRAPHICS_VERSION, cells: graphicCells },
+    glyphInkOverhang,
+  };
+};
+
+const isCellRangePointerChord = (event: Pick<PointerEvent, "altKey" | "metaKey">) => {
+  const applePlatform = typeof navigator !== "undefined"
+    && /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  return event.altKey && (!applePlatform || event.metaKey);
+};
+
+const refreshCellRange = (buffer: CellBuffer, range: CellRangeSnapshot) =>
+  range.shape === "linear"
+    ? createCellLinearRangeSnapshot(buffer, range.anchor, range.head)
+    : createCellRangeSnapshot(buffer, range.anchor, range.head);
+
+export const CellSurface = (props: CellSurfaceProps): ReactNode => {
+  const {
+    viewport,
+    overlayViewport: requestedOverlayViewport,
+    children,
+    focusedId = null,
+    theme,
+    recipe,
+    presentation,
+    feedback,
+    metrics: explicitMetrics,
+    fontSize,
+    fontProfile: requestedFontProfile,
+    palette: paletteOverride,
+    label = "Cell interface",
+    className,
+    probeId,
+    fontAudit: auditFonts = false,
+    onCommand,
+    onHoverChange,
+    linearSelection = false,
+    cellRange: controlledCellRange,
+    cellRangePaintSpans,
+    onCellRangeCommand,
+    onSelectionGesture,
+    resolveSelectionCopyText,
+  } = props;
+  const overlayViewport = requestedOverlayViewport ?? viewport;
+  const fontProfile = useMemo(() => createCellUiFontProfile(requestedFontProfile), [requestedFontProfile]);
+  const fontMetrics = useCellFontMetrics(fontProfile, fontSize, explicitMetrics);
+  const fontAudit = useCellFontAudit(
+    !!probeId && auditFonts && fontMetrics.ready,
+    fontProfile,
+    fontMetrics.metrics
+  );
+  const { metrics } = fontMetrics;
+  const resolvedFeedback = useMemo(() => resolveCellFeedback(feedback), [feedback]);
+  const resolvedTheme = useMemo(() => resolveCellUiTheme(theme), [theme]);
+  const palette = useMemo(() => paletteOverride ?? {
+    color: resolvedTheme.foreground, background: resolvedTheme.background,
+  }, [paletteOverride, resolvedTheme]);
+  const {
+    snapshot: internalCellRange,
+    dispatch: dispatchInternalCellRange,
+  } = useCellRangeState();
+  const rangeControlled = controlledCellRange !== undefined;
+  const cellRange = rangeControlled ? controlledCellRange : internalCellRange;
+  const rangeEditable = !rangeControlled || onCellRangeCommand !== undefined;
+  const dispatchCellRange = useCallback((command: CellRangeCommand) => {
+    if (!rangeControlled) dispatchInternalCellRange(command);
+    onCellRangeCommand?.(command);
+  }, [dispatchInternalCellRange, onCellRangeCommand, rangeControlled]);
+  const [canvasRef] = useState(() => new CellPresentationRegistry());
+  const registerHitRegion = useCallback((element: HTMLDivElement | null) => {
+    canvasRef.setHitRegion(element);
+  }, [canvasRef]);
+  const cursorPresenterRef = useRef<CellCursorPresenter | null>(null);
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const pointerFocusRequestRef = useRef(false);
+  const [activeFocusId, setActiveFocusId] = useState<WidgetId | null>(null);
+  const focusFromPointer = (surface: HTMLDivElement) => {
+    setActiveFocusId(null);
+    pointerFocusRequestRef.current = true;
+    try { surface.focus({ preventScroll: true }); }
+    finally { pointerFocusRequestRef.current = false; }
+  };
+  const runtimeRef = useRef<CellUiRuntime | null>(null);
+  const frameRef = useRef<FrameSnapshot | null>(null);
+  useLayoutEffect(() => {
+    canvasRef.origin = surfaceRef.current;
+    return () => { canvasRef.origin = null; };
+  }, [canvasRef]);
+  useLayoutEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const rectFor = (bounds: CellRect): DOMRect | null => {
+      const origin = surface.getBoundingClientRect();
+      return new DOMRect(
+        origin.left + (bounds.x + CELL_SURFACE_GUARD_CELLS) * metrics.cellWidth,
+        origin.top + (bounds.y + CELL_SURFACE_GUARD_CELLS) * metrics.cellHeight,
+        bounds.width * metrics.cellWidth,
+        bounds.height * metrics.cellHeight,
+      );
+    };
+    return registerCellSurfaceGeometry(surface, {
+      contentRect: () => rectFor({ x: 0, y: 0, ...viewport }),
+      targetRect: (id) => {
+        const entry = frameRef.current?.scene.entries.get(id);
+        return entry?.paintVisible ? rectFor(entry.layoutBounds) : null;
+      },
+    });
+  }, [canvasRef, metrics, viewport]);
+  const hostedSurface = () => !!surfaceRef.current?.closest("[data-cell-overlay-portal],[data-cell-toast]");
+  const presentationMetricsRef = useRef(metrics);
+  const [controller] = useState(() => new CellInteractionController(
+    () => {
+      setActivationFlashId(controller.feedback.activeId);
+      setPressActiveId(controller.press.activeId);
+      setManipulatingIds((current) => sameWidgetIdSet(current, controller.gestures.manipulatingIds) ? current : controller.gestures.manipulatingIds);
+      setInteractionRevision((value) => value + 1);
+    },
+    (command) => {
+      if (command.type === "text-preview-scroll") {
+        runtimeRef.current?.setTextAreaPreviewScroll(command.targetId, {
+          x: command.scrollX,
+          y: command.scrollY,
+        });
+        setInteractionRevision((value) => value + 1);
+      } else onCommandRef.current(command);
+    },
+  ));
+  const focusRef = useRef(controller.focus);
+  const eventsRef = useRef(new EventManager());
+  const gesturesRef = useRef(controller.gestures);
+  const pressRef = useRef(controller.press);
+  const activationFeedbackRef = useRef(controller.feedback);
+  const activationBlinkCountRef = useRef(resolvedFeedback.activationBlinkCount);
+  const onCommandRef = useRef(onCommand);
+  onCommandRef.current = onCommand;
+  const inputModalityRef = useRef<"keyboard" | "pointer">("keyboard");
+  const [inputModality, setInputModalityState] = useState<"keyboard" | "pointer">("keyboard");
+  const setInputModality = useCallback((next: "keyboard" | "pointer") => {
+    controller.setInputSource(next);
+    inputModalityRef.current = next;
+    setInputModalityState(next);
+  }, [controller]);
+  const surfaceFocus = useSurfaceFocus(surfaceRef);
+  const focusVisible = surfaceFocus.active && inputModality === "keyboard";
+  const runtimeActiveFocusId = surfaceFocus.active ? activeFocusId : null;
+  const ownsFocus = surfaceFocus.ownsFocus;
+  const focusedIdRef = useRef<WidgetId | null | undefined>(undefined);
+  const lifetimeRef = useRef<object | null>(null);
+  const projectionRef = useRef<Readonly<{
+    children: ReactElement<RootProps>;
+    focusedId: WidgetId | null;
+    hoveredId: WidgetId | null;
+    scrollbarHoverId: WidgetId | null;
+    recentScrollId: WidgetId | null;
+    tooltipTargetId: WidgetId | null;
+    manipulatingIds: ReadonlySet<WidgetId>;
+    pressActiveId: WidgetId | null;
+    activationFlashId: WidgetId | null;
+    theme: CellUiThemeInput | undefined;
+    recipe: CellUiRecipe | undefined;
+    presentation: CellUiPresentation | undefined;
+    feedback: Partial<CellFeedbackConfig> | undefined;
+    interactionRevision: number;
+    animationTimeMs: number;
+    activeFocusId: WidgetId | null;
+    focusVisible: boolean;
+    width: number;
+    height: number;
+    overlayWidth: number;
+    overlayHeight: number;
+  }> | null>(null);
+  const textDragRef = useRef<Readonly<{
+    targetId: WidgetId;
+    anchor: number;
+    pointerId: number;
+  }> | null>(null);
+  const rangeDragRef = useRef<Readonly<{
+    anchor: CellPoint;
+    anchorClient: Readonly<{ x: number; y: number }>;
+    headClient: Readonly<{ x: number; y: number }>;
+    pointerId: number;
+  }> | null>(null);
+  const linearDragRef = useRef<Readonly<{
+    anchor: CellPoint;
+    head: CellPoint;
+    pointerId: number;
+    active: boolean;
+    clientX: number;
+    clientY: number;
+    anchorClient: Readonly<{ x: number; y: number }>;
+  }> | null>(null);
+  const linearSelectionAnchorRef = useRef<Readonly<{
+    point: CellPoint;
+    local: Readonly<{ x: number; y: number }>;
+  }> | null>(null);
+  const linearScrollFrameRef = useRef<number | null>(null);
+  const stopLinearScroll = useCallback(() => {
+    if (linearScrollFrameRef.current !== null) cancelAnimationFrame(linearScrollFrameRef.current);
+    linearScrollFrameRef.current = null;
+  }, []);
+  useEffect(() => {
+    const view = surfaceRef.current?.ownerDocument.defaultView;
+    const cancel = () => {
+      linearDragRef.current = null;
+      stopLinearScroll();
+    };
+    view?.addEventListener("blur", cancel);
+    return () => {
+      view?.removeEventListener("blur", cancel);
+      cancel();
+    };
+  }, [metrics, stopLinearScroll]);
+  const cellRangePhase = (): CharDeskCellRangePhase =>
+    rangeDragRef.current || linearDragRef.current?.active ? "selecting" : "resting";
+  const reorderCandidateRef = useRef<Readonly<{ pointerId: number; sourceId: WidgetId }> | null>(null);
+  const [reorderDrag, setReorderDrag] = useState<ReorderDrag | null>(null);
+  const reorderDragRef = useRef(reorderDrag);
+  useLayoutEffect(() => { reorderDragRef.current = reorderDrag; }, [reorderDrag]);
+  const [interactionRevision, setInteractionRevision] = useState(0);
+  const [recentScrollId, setRecentScrollId] = useState<WidgetId | null>(null);
+  const scrollHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearRecentScroll = useCallback(() => {
+    if (scrollHideTimerRef.current !== null) clearTimeout(scrollHideTimerRef.current);
+    scrollHideTimerRef.current = null;
+    setRecentScrollId(null);
+  }, []);
+  const revealRecentScroll = useCallback((id: WidgetId) => {
+    if (scrollHideTimerRef.current !== null) clearTimeout(scrollHideTimerRef.current);
+    setRecentScrollId(id);
+    scrollHideTimerRef.current = setTimeout(() => {
+      scrollHideTimerRef.current = null;
+      setRecentScrollId(null);
+    }, 1200);
+  }, []);
+  useEffect(() => {
+    window.addEventListener("blur", clearRecentScroll);
+    return () => {
+      window.removeEventListener("blur", clearRecentScroll);
+      if (scrollHideTimerRef.current !== null) clearTimeout(scrollHideTimerRef.current);
+    };
+  }, [clearRecentScroll]);
+  const [manipulatingIds, setManipulatingIds] = useState<ReadonlySet<WidgetId>>(() => new Set());
+  const [pressActiveId, setPressActiveId] = useState<WidgetId | null>(null);
+  const [activationFlashId, setActivationFlashId] = useState<WidgetId | null>(null);
+  const [fontPresentationRevision, setFontPresentationRevision] = useState(0);
+  const [frame, setFrame] = useState<FrameSnapshot | null>(null);
+  const [animationTimeMs, setAnimationTimeMs] = useState(0);
+  const hasAnimatedWidget = frame
+    ? [...frame.tree.nodes.values()].some((node) =>
+        frame.scene.entries.has(node.id) && (node.kind === "spinner" || node.progress?.value === null))
+    : false;
+  const pointerAppearance = usePointerAppearance(canvasRef, frame, metrics);
+  const hoveredId = activationFeedbackRef.current.settling
+    ? null
+    : pointerAppearance.hoveredId;
+  const onHoverChangeRef = useRef(onHoverChange);
+  onHoverChangeRef.current = onHoverChange;
+  useEffect(() => {
+    if (inputModality === "pointer") onHoverChangeRef.current?.(hoveredId);
+  }, [hoveredId, inputModality]);
+  const availableTooltipTargets = new Set(
+    [...(frame?.tree.nodes.values() ?? [])].flatMap((node) =>
+      node.kind === "tooltip" && node.tooltipTargetId ? [node.tooltipTargetId] : []),
+  );
+  const logicalFocusedId = frame?.semantics.focusedId ?? focusedId ?? null;
+  const tooltip = useCellTooltipTarget(
+    hoveredId && availableTooltipTargets.has(hoveredId) ? hoveredId : null,
+    logicalFocusedId && availableTooltipTargets.has(logicalFocusedId) ? logicalFocusedId : null,
+    focusVisible,
+    pressActiveId,
+  );
+  const tooltipTargetId = tooltip.targetId;
+  const focusOwnsTooltip = focusVisible && logicalFocusedId === tooltipTargetId;
+  useEffect(() => {
+    if (!tooltipTargetId) return;
+    const dismiss = () => tooltip.dismiss();
+    if (!focusOwnsTooltip) window.addEventListener("scroll", dismiss, true);
+    window.addEventListener("blur", dismiss);
+    return () => {
+      if (!focusOwnsTooltip) window.removeEventListener("scroll", dismiss, true);
+      window.removeEventListener("blur", dismiss);
+    };
+  }, [focusOwnsTooltip, tooltipTargetId]);
+  useLayoutEffect(() => {
+    const current = frameRef.current;
+    if (current && inputModality === "pointer") controller.setHovered(current, hoveredId);
+  }, [controller, hoveredId, inputModality]);
+  useEffect(() => {
+    if (!hasAnimatedWidget) {
+      setAnimationTimeMs(0);
+      return;
+    }
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+    let pending: number | null = null;
+    let startedAt: number | null = null;
+    const cancel = () => {
+      if (pending !== null) cancelAnimationFrame(pending);
+      pending = null;
+      startedAt = null;
+    };
+    const tick = (time: number) => {
+      pending = null;
+      if (document.hidden || reducedMotion?.matches) return;
+      startedAt ??= time;
+      const elapsed = time - startedAt;
+      const quantized = Math.floor(elapsed / INDETERMINATE_PROGRESS_STEP_MS)
+        * INDETERMINATE_PROGRESS_STEP_MS;
+      setAnimationTimeMs((current) => current === quantized ? current : quantized);
+      pending = requestAnimationFrame(tick);
+    };
+    const sync = () => {
+      cancel();
+      setAnimationTimeMs(0);
+      if (!document.hidden && !reducedMotion?.matches) pending = requestAnimationFrame(tick);
+    };
+    reducedMotion?.addEventListener("change", sync);
+    document.addEventListener("visibilitychange", sync);
+    sync();
+    return () => {
+      cancel();
+      reducedMotion?.removeEventListener("change", sync);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, [hasAnimatedWidget]);
+  const syncManipulatingIds = useCallback(() => {
+    const next = gesturesRef.current.manipulatingIds;
+    setManipulatingIds((current) => sameWidgetIdSet(current, next) ? current : next);
+  }, []);
+
+  const cancelActivationFeedback = useCallback(() => {
+    if (controller.cancel()) {
+      setActivationFlashId(null);
+      setInteractionRevision((value) => value + 1);
+    }
+  }, [controller]);
+
+  const flushActivationFeedbackCompletion = useCallback(() => controller.flush(), [controller]);
+
+  useEffect(() => {
+    if (activationBlinkCountRef.current === resolvedFeedback.activationBlinkCount) return;
+    activationBlinkCountRef.current = resolvedFeedback.activationBlinkCount;
+    controller.settle();
+  }, [controller, resolvedFeedback.activationBlinkCount]);
+
+  const confirmationThemeRef = useRef(resolvedTheme);
+  const confirmationPaletteRef = useRef(palette);
+  useLayoutEffect(() => {
+    if (!sameWidgetValue(confirmationThemeRef.current, resolvedTheme)
+      || !sameWidgetValue(confirmationPaletteRef.current, palette)) controller.settle();
+    confirmationThemeRef.current = resolvedTheme;
+    confirmationPaletteRef.current = palette;
+  }, [controller, resolvedTheme, palette]);
+
+  useEffect(() => {
+    const deactivate = () => controller.deactivate();
+    const visibility = () => { if (document.hidden) deactivate(); };
+    window.addEventListener("blur", deactivate);
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      window.removeEventListener("blur", deactivate);
+      document.removeEventListener("visibilitychange", visibility);
+    };
+  }, [controller]);
+
+  useEffect(() => {
+    const token = {};
+    lifetimeRef.current = token;
+    return () => {
+      queueMicrotask(() => {
+        if (lifetimeRef.current !== token) return;
+        runtimeRef.current?.dispose();
+        runtimeRef.current = null;
+      });
+    };
+  }, []);
+
+  useEffect(() => () => {
+    cursorPresenterRef.current?.dispose();
+    cursorPresenterRef.current = null;
+    controller.cancel();
+  }, [controller]);
+
+  useLayoutEffect(() => {
+    const previousProjection = projectionRef.current;
+    if (
+      previousProjection?.children === children
+      && previousProjection.focusedId === focusedId
+      && previousProjection.hoveredId === hoveredId
+      && previousProjection.scrollbarHoverId === pointerAppearance.scrollbarHoverId
+      && previousProjection.recentScrollId === recentScrollId
+      && previousProjection.tooltipTargetId === tooltipTargetId
+      && previousProjection.manipulatingIds === manipulatingIds
+      && previousProjection.pressActiveId === pressActiveId
+      && previousProjection.activationFlashId === activationFlashId
+      && previousProjection.theme === theme
+      && previousProjection.recipe === recipe
+      && previousProjection.presentation === presentation
+      && previousProjection.feedback === feedback
+      && previousProjection.interactionRevision === interactionRevision
+      && previousProjection.animationTimeMs === animationTimeMs
+      && previousProjection.activeFocusId === runtimeActiveFocusId
+      && previousProjection.focusVisible === focusVisible
+      && previousProjection.width === viewport.width
+      && previousProjection.height === viewport.height
+      && previousProjection.overlayWidth === overlayViewport.width
+      && previousProjection.overlayHeight === overlayViewport.height
+    ) return;
+
+    let runtime = runtimeRef.current;
+    if (!runtime) {
+      runtime = new CellUiRuntime({ viewport, overlayViewport, theme, recipe, presentation, feedback });
+      runtimeRef.current = runtime;
+    } else {
+      runtime.resize(viewport, overlayViewport);
+      runtime.setTheme(theme);
+      runtime.setRecipe(recipe);
+      runtime.setPresentation(presentation);
+      runtime.setFeedback(feedback);
+    }
+    const focusedChanged = focusedIdRef.current !== focusedId;
+    const next = runtime.render(children, {
+      ...controller.renderState,
+      hoveredId,
+      visibleScrollbarIds: new Set([pointerAppearance.scrollbarHoverId, recentScrollId].filter(
+        (id): id is WidgetId => id !== null)),
+      tooltipTargetId,
+      animationTimeMs,
+      colors: { color: palette.color, backgroundColor: palette.background },
+      activeFocusId: runtimeActiveFocusId,
+      focusVisible,
+      resolveFocusedId: (tree) => {
+        focusRef.current.sync(tree, focusedChanged ? focusedId : undefined);
+        if (!focusRef.current.focusedId && focusedId && tree.nodes.has(focusedId)) {
+          focusRef.current.sync(tree, focusedId);
+        }
+        return focusRef.current.focusedId;
+      },
+    });
+    for (const pointerId of eventsRef.current.sync(next)) {
+      gesturesRef.current.cancel(pointerId);
+      pressRef.current.cancelPointer(pointerId);
+    }
+    for (const pointerId of gesturesRef.current.sync((candidate) => validGestureCandidate(next, candidate))) {
+      eventsRef.current.cancel(pointerId);
+      pressRef.current.cancelPointer(pointerId);
+      const surface = surfaceRef.current;
+      if (surface?.hasPointerCapture(pointerId)) surface.releasePointerCapture(pointerId);
+    }
+    syncManipulatingIds();
+    if (pressRef.current.sync(next)) setPressActiveId(pressRef.current.activeId);
+    if (controller.sync(next)) {
+      setActivationFlashId(null);
+      flushActivationFeedbackCompletion();
+    }
+    focusedIdRef.current = focusedId;
+    for (const command of [...textViewportCommands(next), ...scrollViewportCommands(next)]) onCommand(command);
+    if (focusedChanged && focusedId) {
+      const reveal = revealCommandForTarget(next, focusedId);
+      if (reveal) onCommand(reveal);
+    }
+    frameRef.current = next;
+    projectionRef.current = {
+      children,
+      focusedId,
+      hoveredId,
+      scrollbarHoverId: pointerAppearance.scrollbarHoverId,
+      recentScrollId,
+      tooltipTargetId,
+      manipulatingIds,
+      pressActiveId,
+      activationFlashId,
+      theme,
+      recipe,
+      presentation,
+      feedback,
+      interactionRevision,
+      animationTimeMs,
+      activeFocusId: runtimeActiveFocusId,
+      focusVisible,
+      width: viewport.width,
+      height: viewport.height,
+      overlayWidth: overlayViewport.width,
+      overlayHeight: overlayViewport.height,
+    };
+    // The headless runtime is an external store; publish its committed snapshot.
+    setFrame(next);
+  }, [controller, palette.color, palette.background, activationFlashId, animationTimeMs, children, flushActivationFeedbackCompletion, focusedId, focusVisible, hoveredId, pointerAppearance.scrollbarHoverId, recentScrollId, tooltipTargetId, interactionRevision, manipulatingIds, onCommand, overlayViewport, pressActiveId, recipe, presentation, runtimeActiveFocusId, syncManipulatingIds, theme, feedback, viewport]);
+
+  const presentationWindowRef = useRef<CellRect | null>(null);
+  const presentCurrentFrame = (current: FrameSnapshot, force = true): void => {
+    const canvas = canvasRef.current;
+    const surface = surfaceRef.current;
+    if (!canvas || !surface) return;
+    const window = resolveCellPresentationWindow(surface, viewport, metrics, presentationWindowRef.current);
+    const previous = presentationWindowRef.current;
+    if (!force && (window === previous || (window && previous
+      && window.y === previous.y && window.height === previous.height
+      && window.width === previous.width))) return;
+    presentationWindowRef.current = window;
+    if (!sameWidgetValue(presentationMetricsRef.current, metrics)) {
+      const pointerIds = new Set(gesturesRef.current.sync(() => false));
+      if (rangeDragRef.current) pointerIds.add(rangeDragRef.current.pointerId);
+      if (linearDragRef.current) pointerIds.add(linearDragRef.current.pointerId);
+      if (textDragRef.current) pointerIds.add(textDragRef.current.pointerId);
+      rangeDragRef.current = null;
+      linearDragRef.current = null;
+      stopLinearScroll();
+      textDragRef.current = null;
+      for (const id of pointerIds) {
+        eventsRef.current.cancel(id);
+        pressRef.current.cancelPointer(id);
+        if (surfaceRef.current?.hasPointerCapture(id)) surfaceRef.current.releasePointerCapture(id);
+      }
+      setPressActiveId(pressRef.current.activeId);
+      syncManipulatingIds();
+    }
+    const cursor = cursorPresenterRef.current ??= new CellCursorPresenter(canvas);
+    presentFrameWithCursor(
+      cursor,
+      canvas,
+      current,
+      metrics,
+      palette,
+      cellRange,
+      cellRangePaintSpans,
+      cellRangePhase(),
+      resolvedTheme,
+      fontProfile,
+      reorderDrag,
+      hostedSurface(),
+      window ?? undefined,
+    );
+    canvas.style.top = `${(window?.y ?? 0) * metrics.cellHeight}px`;
+    let allPlanesPresented = true;
+    for (const plane of current.overlayPlanes) {
+      const overlayCanvas = canvasRef.overlay(plane.rootId);
+      if (!overlayCanvas) { allPlanesPresented = false; continue; }
+      const paintWindow = window
+        ? { x: 0, y: window.y, width: current.overlayBuffer.width, height: window.height }
+        : undefined;
+      const visible = paintWindow ? intersectSceneRects(plane.bounds, paintWindow) : plane.bounds;
+      if (visible.width <= 0 || visible.height <= 0) {
+        overlayCanvas.style.display = "none";
+        overlayCanvas.width = 0;
+        overlayCanvas.height = 0;
+        continue;
+      }
+      overlayCanvas.style.display = "block";
+      const windowHeight = window?.height ?? current.overlayBuffer.height;
+      overlayCanvas.style.clipPath = `inset(${Math.max(0, plane.bounds.y - (window?.y ?? 0)) * metrics.cellHeight}px ${Math.max(0,
+        current.overlayBuffer.width - plane.bounds.x - plane.bounds.width) * metrics.cellWidth}px ${Math.max(0,
+        (window?.y ?? 0) + windowHeight - plane.bounds.y - plane.bounds.height) * metrics.cellHeight}px ${plane.bounds.x * metrics.cellWidth}px)`;
+      presentFrame(
+        overlayCanvas,
+        current,
+        metrics,
+        palette,
+        cellRange,
+        cellRangePaintSpans,
+        cellRangePhase(),
+        resolvedTheme,
+        fontProfile,
+        {
+          buffer: current.overlayBuffer,
+          viewport: plane.bounds,
+          window: paintWindow,
+          transparent: true,
+        }
+      );
+      overlayCanvas.style.top = `${(window?.y ?? 0) * metrics.cellHeight}px`;
+    }
+    presentationMetricsRef.current = metrics;
+    surfaceRef.current?.dispatchEvent(new Event("cell-surface-geometry-change", { bubbles: true }));
+    if (allPlanesPresented) controller.presented(current.confirmation);
+  };
+  const presentCurrentRef = useRef(presentCurrentFrame);
+  presentCurrentRef.current = presentCurrentFrame;
+  useLayoutEffect(() => {
+    if (!frame || frameRef.current !== frame) return;
+    presentCurrentRef.current(frame);
+  }, [controller, canvasRef, cellRange, cellRangePaintSpans, fontProfile, frame, metrics, palette, reorderDrag, resolvedTheme, stopLinearScroll, syncManipulatingIds]);
+
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    const view = surface?.ownerDocument.defaultView;
+    if (!surface || !view) return;
+    let pending = 0;
+    const schedule = () => {
+      if (pending) return;
+      pending = view.requestAnimationFrame(() => {
+        pending = 0;
+        const current = frameRef.current;
+        if (current) presentCurrentRef.current(current, false);
+      });
+    };
+    const coverScrolledRows = () => {
+      const current = frameRef.current;
+      if (current) presentCurrentRef.current(current, false);
+    };
+    surface.ownerDocument.addEventListener("scroll", coverScrolledRows, true);
+    view.addEventListener("resize", schedule);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
+    observer?.observe(surface);
+    for (let ancestor = surface.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      const overflow = view.getComputedStyle(ancestor).overflowY;
+      if (overflow === "auto" || overflow === "scroll" || overflow === "hidden" || overflow === "clip") {
+        observer?.observe(ancestor);
+      }
+    }
+    return () => {
+      if (pending) view.cancelAnimationFrame(pending);
+      surface.ownerDocument.removeEventListener("scroll", coverScrolledRows, true);
+      view.removeEventListener("resize", schedule);
+      observer?.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      const current = frameRef.current;
+      if (!current) return;
+      const windowHeight = presentationWindowRef.current?.height ?? viewport.height;
+      const width = (viewport.width + 2 * CELL_SURFACE_GUARD_CELLS) * metrics.cellWidth;
+      const height = (windowHeight + 2 * CELL_SURFACE_GUARD_CELLS) * metrics.cellHeight;
+      if (canvas.style.width !== `${width}px` || canvas.style.height !== `${height}px`) {
+        presentCurrentRef.current(current);
+      }
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [canvasRef, metrics, viewport]);
+
+  const fontPresentRef = useRef<() => void>(() => undefined);
+  const scheduleFontPresentRef = useRef<() => void>(() => undefined);
+  const requestedFontsRef = useRef(new Set<string>());
+  useLayoutEffect(() => {
+    fontPresentRef.current = () => {
+      const current = frameRef.current;
+      if (current) {
+        presentCurrentRef.current(current);
+        setFontPresentationRevision((revision) => revision + 1);
+      }
+    };
+  }, [canvasRef, metrics, palette, cellRange, resolvedTheme, fontProfile]);
+  useEffect(() => {
+    requestedFontsRef.current.clear();
+  }, [fontProfile]);
+  useEffect(() => {
+    if (!frame || !document.fonts) return;
+    const samples: { grapheme: string; bold: boolean; italic: boolean }[] = [];
+    for (let y = 0; y < frame.buffer.height; y++) {
+      for (let x = 0; x < frame.buffer.width; x++) {
+        const cell = frame.buffer.get(x, y);
+        if (!cell || cell.continuation || !cell.text.trim()) continue;
+        const bold = !!cell.style.bold;
+        const italic = !!cell.style.italic;
+        const key = `${bold}:${italic}:${cell.text}`;
+        if (requestedFontsRef.current.has(key)) continue;
+        requestedFontsRef.current.add(key);
+        samples.push({ grapheme: cell.text, bold, italic });
+      }
+    }
+    if (!samples.length) return;
+    // Explicit loads also cover engines that omit FontFaceSet loading events.
+    void loadCharDeskCanvasFonts(samples, {
+      metrics,
+      ...(fontProfile ? { fontProfile } : {}),
+    }).then(() => {
+      scheduleFontPresentRef.current();
+    });
+  }, [fontProfile, frame, metrics]);
+
+  useEffect(() => {
+    const fonts = document.fonts;
+    if (!fonts) return;
+    let active = true;
+    let pending: number | null = null;
+    const schedule = () => {
+      if (!active || pending !== null) return;
+      pending = requestAnimationFrame(() => {
+        pending = null;
+        if (active) fontPresentRef.current();
+      });
+    };
+    scheduleFontPresentRef.current = schedule;
+    fonts.addEventListener("loadingdone", schedule);
+    void fonts.ready.then(schedule, () => undefined);
+    return () => {
+      active = false;
+      fonts.removeEventListener("loadingdone", schedule);
+      if (pending !== null) cancelAnimationFrame(pending);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const surface = surfaceRef.current as CellProbeHost | null;
+    if (!surface || !probeId || !frame) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const snapshot: CellProbeSnapshot = {
+      ...captureCellProbe(frame, { probeId }),
+      presentation: {
+        ...captureCellProbePresentation(frame, canvas, metrics, fontProfile),
+        measurement: { source: fontMetrics.source, ready: fontMetrics.ready },
+        ...(auditFonts ? { fontAudit } : {}),
+      },
+    };
+    surface[CELL_SURFACE_PROBE_PROPERTY] = snapshot;
+    const subprobes: CellProbeHost[] = [];
+    for (const semantic of frame.semantics.nodes.values()) {
+      if (!semantic.probeId) continue;
+      const region = frame.scene.entries.get(semantic.id)?.layoutBounds;
+      const target = [...surface.querySelectorAll<CellProbeHost>("[data-cell-semantic-id]")]
+        .find((element) => element.dataset.cellSemanticId === semantic.id);
+      if (!region || !target) continue;
+      const captured = captureCellProbe(frame, { region, probeId: semantic.probeId });
+      let scopeId = frame.tree.nodes.get(semantic.id)?.parentId ?? null;
+      while (scopeId && !frame.tree.nodes.get(scopeId)?.overlayScope) {
+        scopeId = frame.tree.nodes.get(scopeId)?.parentId ?? null;
+      }
+      const scope = scopeId ? frame.scene.entries.get(scopeId)?.contentBounds : null;
+      target[CELL_SURFACE_PROBE_PROPERTY] = {
+        ...captured,
+        region: { x: 0, y: 0, width: region.width, height: region.height },
+        viewport: { width: region.width, height: region.height },
+        overlayViewport: { width: scope?.width ?? region.width, height: scope?.height ?? region.height },
+        cells: captured.cells.map((cell) => ({ ...cell, x: cell.x - region.x, y: cell.y - region.y })),
+        overlays: captured.overlays.filter((overlay) => isDescendantOf(frame.tree, overlay.rootId, semantic.id))
+          .map((overlay) => ({ ...overlay,
+            bounds: { ...overlay.bounds, x: overlay.bounds.x - region.x, y: overlay.bounds.y - region.y },
+            cells: overlay.cells.map((cell) => ({ ...cell, x: cell.x - region.x, y: cell.y - region.y })),
+          })),
+        presentation: snapshot.presentation,
+      };
+      target.dataset.cellProbeOrigin = `${region.x},${region.y}`;
+      subprobes.push(target);
+    }
+    const capture = (options: CellProbeOptions): CellProbeSnapshot => ({
+      ...captureCellProbe(frame, { ...options, probeId: options.probeId ?? probeId }),
+      presentation: snapshot.presentation,
+    });
+    surface.__chardeskCaptureCellProbeV5 = capture;
+    return () => {
+      if (surface[CELL_SURFACE_PROBE_PROPERTY] === snapshot) {
+        delete surface[CELL_SURFACE_PROBE_PROPERTY];
+      }
+      if (surface.__chardeskCaptureCellProbeV5 === capture) delete surface.__chardeskCaptureCellProbeV5;
+      for (const target of subprobes) {
+        delete target[CELL_SURFACE_PROBE_PROPERTY];
+        delete target.dataset.cellProbeOrigin;
+      }
+    };
+  }, [canvasRef, auditFonts, fontPresentationRevision, fontProfile, frame, metrics, probeId, fontMetrics, fontAudit]);
+
+  useEffect(() => {
+    if (!frame || !cellRange || !rangeEditable) return;
+    const next = refreshCellRange(frame.buffer, cellRange);
+    if (!equalCellRangeSnapshot(cellRange, next)) {
+      dispatchCellRange(next ? { type: "set", snapshot: next } : { type: "clear" });
+    }
+  }, [cellRange, dispatchCellRange, frame, rangeEditable]);
+
+  const syncDomFocus = useCallback(() => {
+    const surface = surfaceRef.current;
+    const targetId = frame?.semantics.focusedId;
+    if (!surface || !targetId || inputModalityRef.current !== "keyboard") return;
+    if (!ownsFocus()) return;
+    const active = document.activeElement;
+    const semanticTarget = [...surface.querySelectorAll<HTMLElement>("[data-cell-semantic-id]")]
+      .find((element) => element.dataset.cellSemanticId === targetId);
+    const textTarget = [...surface.querySelectorAll<HTMLTextAreaElement>("textarea[data-cell-text-editor]")]
+      .find((textarea) => textarea.dataset.cellTextEditor === targetId);
+    const target = textTarget ?? semanticTarget;
+    if (target && active !== target) target.focus({ preventScroll: true });
+  }, [frame, ownsFocus]);
+
+  useLayoutEffect(syncDomFocus, [syncDomFocus]);
+
+  const dispatch = useCallback((command: WidgetCommand | null) => {
+    const current = frameRef.current;
+    if (command?.type === "scroll" || command?.type === "text-preview-scroll") {
+      revealRecentScroll(command.targetId);
+    }
+    if (current) controller.commit(command, current, resolvedFeedback.activationBlinkCount);
+  }, [controller, resolvedFeedback.activationBlinkCount, revealRecentScroll]);
+
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const wheel = (event: WheelEvent) => {
+      const current = frameRef.current;
+      if (!current || event.ctrlKey || !canvasRef.owns(event.target)) return;
+      const result = resolveWheelInput(current, {
+        type: "wheel",
+        point: pxToCellPoint(event, surface.getBoundingClientRect(), metrics, CELL_SURFACE_GUARD_CELLS),
+        deltaX: event.deltaX,
+        deltaY: event.deltaY,
+      });
+      if (result.consumed) event.preventDefault();
+      dispatch(result.command);
+    };
+    surface.addEventListener("wheel", wheel, { passive: false });
+    return () => surface.removeEventListener("wheel", wheel);
+  }, [canvasRef, dispatch, frame, metrics]);
+
+  const textDragPointFor = (event: PointerEvent<HTMLDivElement>) => {
+    const bounds = surfaceRef.current?.getBoundingClientRect();
+    return bounds ? pxToCellPoint(event, bounds, metrics, CELL_SURFACE_GUARD_CELLS) : null;
+  };
+
+  const isSurfaceCanvas = (target: EventTarget | null) =>
+    canvasRef.owns(target);
+
+  const setCellRange = (anchor: CellPoint, head: CellPoint, shape: "rectangle" | "linear" = "rectangle") => {
+    if (!frame || !rangeEditable) return;
+    const snapshot = shape === "linear"
+      ? createCellLinearRangeSnapshot(frame.buffer, anchor, head)
+      : createCellRangeSnapshot(frame.buffer, anchor, head);
+    dispatchCellRange(snapshot ? { type: "set", snapshot } : { type: "clear" });
+  };
+
+  const notifySelectionGesture = (phase: "start" | "move" | "end", shape: "linear" | "rectangle",
+    anchor: Readonly<{ x: number; y: number }>, head: Readonly<{ x: number; y: number }>) => {
+    const current = frameRef.current;
+    const bounds = surfaceRef.current?.getBoundingClientRect();
+    if (current && bounds) onSelectionGesture?.({ phase, shape, anchor, head, bounds, buffer: current.buffer });
+  };
+
+  const scheduleLinearScroll = () => {
+    if (linearScrollFrameRef.current !== null) return;
+    const tick = () => {
+      linearScrollFrameRef.current = null;
+      const drag = linearDragRef.current;
+      const canvas = canvasRef.current;
+      const surface = surfaceRef.current;
+      const current = frameRef.current;
+      if (!drag?.active || !canvas || !surface || !current || !canvas.ownerDocument.hasFocus()) return;
+      const bounds = surface.getBoundingClientRect();
+      const view = canvas.ownerDocument.defaultView;
+      if (!view || drag.clientX < bounds.left || drag.clientX >= bounds.right) return;
+      const edge = 48;
+      const atTop = drag.clientY < edge && bounds.top < edge;
+      const atBottom = drag.clientY > view.innerHeight - edge && bounds.bottom > view.innerHeight - edge;
+      if (!atTop && !atBottom) return;
+      const proximity = atTop ? edge - drag.clientY : drag.clientY - (view.innerHeight - edge);
+      const speed = Math.ceil(2 + 18 * Math.min(1, proximity / edge) ** 2);
+      const before = view.scrollY;
+      view.scrollBy({ top: (atTop ? -1 : 1) * speed, behavior: "instant" });
+      if (view.scrollY === before) return;
+      const point = pxToCellPoint(drag, surface.getBoundingClientRect(), metrics, CELL_SURFACE_GUARD_CELLS);
+      if (point.x !== drag.head.x || point.y !== drag.head.y) {
+        linearDragRef.current = { ...drag, head: point };
+        const snapshot = createCellLinearRangeSnapshot(current.buffer, drag.anchor, point);
+        if (snapshot) dispatchCellRange({ type: "set", snapshot });
+      }
+      notifySelectionGesture("move", "linear", drag.anchorClient,
+        { x: drag.clientX, y: drag.clientY });
+      linearScrollFrameRef.current = requestAnimationFrame(tick);
+    };
+    linearScrollFrameRef.current = requestAnimationFrame(tick);
+  };
+
+  const applyGestureSignals = (
+    current: FrameSnapshot,
+    signals: readonly GestureSignal[]
+  ) => {
+    for (const signal of signals) {
+      if (signal.kind === "drag" && current.tree.nodes.get(signal.targetId)?.kind === "list-item"
+        && current.tree.nodes.get(signal.targetId)?.reorderable) {
+        if (signal.phase === "start" || signal.phase === "update") {
+          const candidate = reorderCandidateRef.current;
+          if (candidate?.pointerId === signal.pointerId && candidate.sourceId === signal.targetId) {
+            setReorderDrag({ pointerId: signal.pointerId, sourceId: signal.targetId,
+              point: signal.precisePoint ?? signal.point });
+          }
+        } else setReorderDrag(null);
+      }
+      dispatch(commandForGestureSignal(current, signal, focusRef.current));
+    }
+  };
+
+  const finishPointer = (event: PointerEvent<HTMLDivElement>) => {
+    const { pointerId, currentTarget } = event;
+    eventsRef.current.cancel(pointerId);
+    gesturesRef.current.cancel(pointerId);
+    if (reorderCandidateRef.current?.pointerId === pointerId) reorderCandidateRef.current = null;
+    setReorderDrag((current) => current?.pointerId === pointerId ? null : current);
+    syncManipulatingIds();
+    if (pressRef.current.cancelPointer(pointerId)) setPressActiveId(pressRef.current.activeId);
+    const rectangle = rangeDragRef.current;
+    if (rectangle?.pointerId === pointerId) {
+      notifySelectionGesture("end", "rectangle", rectangle.anchorClient, rectangle.headClient);
+      rangeDragRef.current = null;
+    }
+    const linear = linearDragRef.current;
+    if (linear?.pointerId === pointerId) {
+      if (linear.active) notifySelectionGesture("end", "linear", linear.anchorClient,
+        { x: linear.clientX, y: linear.clientY });
+      linearDragRef.current = null;
+    }
+    stopLinearScroll();
+    if (textDragRef.current?.pointerId === pointerId) textDragRef.current = null;
+    if (currentTarget.hasPointerCapture(pointerId)) currentTarget.releasePointerCapture(pointerId);
+  };
+
+  const focusTextarea = (targetId: WidgetId) => {
+    const textareas = canvasRef.current?.parentElement?.querySelectorAll<HTMLTextAreaElement>(
+      "textarea[data-cell-text-editor]"
+    );
+    [...(textareas ?? [])]
+      .find((textarea) => textarea.dataset.cellTextEditor === targetId)
+      ?.focus({ preventScroll: true });
+  };
+
+  const adoptTextAreaPreviewScroll = (current: FrameSnapshot, targetId: WidgetId) => {
+    const node = current.tree.nodes.get(targetId);
+    if (node?.kind !== "text-area" || node.focusActive || !node.textEditor) return;
+    dispatch({
+      type: "text",
+      targetId,
+      command: { type: "set-scroll", x: node.textEditor.scrollX, y: node.textEditor.scrollY },
+    });
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.defaultPrevented) return;
+    setInputModality("keyboard");
+    const input = keyInputFromKeyboardEvent(event.nativeEvent);
+    if (isCellKeyPress(input, "Escape") && tooltipTargetId) {
+      tooltip.dismiss();
+      event.preventDefault();
+      return;
+    }
+    if (activationFeedbackRef.current.settling) {
+      if (isCellKeyPress(input, "Tab")) return;
+      if (isCellKeyPress(input, "Escape") && frame) {
+        controller.key(frame, input, resolvedFeedback.activationBlinkCount);
+      }
+      event.preventDefault();
+      return;
+    }
+    if (isCellKeyPress(input, "Escape") && cellRange && rangeEditable) {
+      event.preventDefault();
+      linearSelectionAnchorRef.current = null;
+      dispatchCellRange({ type: "clear" });
+      return;
+    }
+    if (
+      !frame
+      || (event.target instanceof HTMLTextAreaElement && event.key !== "Escape")
+    ) return;
+    if (controller.key(frame, input, resolvedFeedback.activationBlinkCount)) event.preventDefault();
+  };
+
+  const onSurfaceBlur = (event: FocusEvent<HTMLDivElement>) => {
+    surfaceFocus.leave(event);
+    const surface = event.currentTarget;
+    const relatedTarget = event.relatedTarget;
+    if (relatedTarget instanceof Node && surface.contains(relatedTarget)) return;
+    const cancelTransientFeedback = () => {
+      const pointerIds = gesturesRef.current.sync(() => false);
+      for (const pointerId of pointerIds) {
+        eventsRef.current.cancel(pointerId);
+        if (surface.hasPointerCapture(pointerId)) surface.releasePointerCapture(pointerId);
+      }
+      rangeDragRef.current = null;
+      linearDragRef.current = null;
+      stopLinearScroll();
+      textDragRef.current = null;
+      reorderCandidateRef.current = null;
+      setReorderDrag(null);
+      syncManipulatingIds();
+      if (pressRef.current.cancel()) setPressActiveId(null);
+      cancelActivationFeedback();
+    };
+    const confirmExit = () => {
+      tooltip.dismiss();
+      setActiveFocusId(null);
+      cancelTransientFeedback();
+      linearSelectionAnchorRef.current = null;
+      const current = frameRef.current;
+      if (current) dispatch(dismissCommandForFocusExit(current));
+      if (cellRange && rangeEditable) dispatchCellRange({ type: "clear" });
+    };
+    if (relatedTarget) {
+      confirmExit();
+      return;
+    }
+    if (!surface.ownerDocument.hasFocus()) {
+      cancelTransientFeedback();
+      return;
+    }
+    // A null relatedTarget can mean either page chrome or a transient browser/
+    // React focus gap. Wait for the document to expose its settled owner.
+    queueMicrotask(() => {
+      const document = surface.ownerDocument;
+      if (
+        surface.isConnected
+        && document.hasFocus()
+        && !surface.contains(document.activeElement)
+      ) confirmExit();
+    });
+  };
+
+  return (
+    <div
+      ref={surfaceRef}
+      className={className}
+      data-cell-surface=""
+      tabIndex={0}
+      aria-label={label}
+      data-cell-probe={probeId}
+      data-cell-range={cellRange
+        ? `${cellRange.bounds.x},${cellRange.bounds.y},${cellRange.bounds.width},${cellRange.bounds.height}`
+        : undefined}
+      data-cell-focused={frame?.semantics.focusedId ?? undefined}
+      data-cell-active-focus={frame
+        ? [...frame.tree.nodes.values()].find((node) => node.focusActive)?.id
+        : undefined}
+      data-cell-hovered={hoveredId ?? undefined}
+      data-cell-manipulating={manipulatingIds.size > 0 || undefined}
+      data-cell-press-active={pressActiveId ?? undefined}
+      data-cell-activation-flash={activationFlashId ?? undefined}
+      data-cell-confirmation-session={frame?.confirmation?.sessionId}
+      data-cell-confirmation-phase={frame?.confirmation?.phase}
+      data-cell-overlay-count={frame?.overlayPlanes.length || undefined}
+      data-cell-focus-visible={frame?.semantics.focusedId
+        && frame.tree.nodes.get(frame.semantics.focusedId)?.focusVisible
+        ? true
+        : undefined}
+      onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+        tooltip.dismiss();
+        pointerAppearance.suspend();
+        if (event.button !== 0) return;
+        setInputModality("pointer");
+        if (!frame) return;
+        const point = textDragPointFor(event);
+        if (!point) return;
+        if (!isSurfaceCanvas(event.target)) {
+          const textarea = event.target instanceof HTMLTextAreaElement ? event.target : null;
+          const editorId = textarea?.dataset.cellTextEditor;
+          if (!editorId || editorId !== hitTest(frame.scene, point)[0]) return;
+          event.preventDefault();
+        }
+        if (controller.interceptPointer(frame, point)) {
+          const command = commandForInput(
+            { type: "pointer", phase: "down", point, button: event.button },
+            frame,
+            focusRef.current
+          );
+          if (command?.type === "dismiss") dispatch(command);
+          event.preventDefault();
+          focusFromPointer(event.currentTarget);
+          return;
+        }
+        cancelActivationFeedback();
+        if (isCellRangePointerChord(event) && rangeEditable) {
+          event.preventDefault();
+          const client = { x: event.clientX, y: event.clientY };
+          const bounds = event.currentTarget.getBoundingClientRect();
+          linearSelectionAnchorRef.current = { point, local: { x: client.x - bounds.left, y: client.y - bounds.top } };
+          rangeDragRef.current = { anchor: point, anchorClient: client, headClient: client, pointerId: event.pointerId };
+          linearDragRef.current = null;
+          stopLinearScroll();
+          textDragRef.current = null;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          setCellRange(point, point);
+          notifySelectionGesture("start", "rectangle", client, client);
+          focusFromPointer(event.currentTarget);
+          return;
+        }
+        const immediate = commandForInput(
+          { type: "pointer", phase: "down", point, button: event.button },
+          frame,
+          focusRef.current
+        );
+        if (immediate?.type === "dismiss" || immediate?.type === "set-expanded") {
+          if (cellRange && rangeEditable) dispatchCellRange({ type: "clear" });
+          linearSelectionAnchorRef.current = null;
+          dispatch(immediate);
+          const target = frame.tree.nodes.get(immediate.targetId);
+          if (target?.kind === "combobox-input") focusTextarea(target.id);
+          else focusFromPointer(event.currentTarget);
+          return;
+        }
+        const editor = textEditorAtPoint(frame, point);
+        const textLayout = editor ? frame.textLayouts.get(editor.id) : undefined;
+        const hitPart = hitTestCell(frame.scene, point)?.part;
+        const onScrollbar = hitPart === "scrollbar-x" || hitPart === "scrollbar-y" || hitPart === "scrollbar-corner";
+        if (editor && textLayout && !editor.disabled && !onScrollbar) {
+          if (cellRange && rangeEditable) dispatchCellRange({ type: "clear" });
+          linearSelectionAnchorRef.current = null;
+          event.preventDefault();
+          adoptTextAreaPreviewScroll(frame, editor.id);
+          const contentClip = frame.scene.entries.get(editor.id)?.contentClip;
+          if (contentClip && cellRectContainsPoint(contentClip, point)) {
+            const offset = offsetAtCellPoint(textLayout, point);
+            textDragRef.current = { targetId: editor.id, anchor: offset, pointerId: event.pointerId };
+            event.currentTarget.setPointerCapture(event.pointerId);
+            dispatch({
+              type: "text",
+              targetId: editor.id,
+              command: { type: "set-selection", anchor: offset },
+            });
+          } else {
+            dispatch({ type: "focus", targetId: editor.id });
+          }
+          focusTextarea(editor.id);
+          return;
+        }
+        const targetId = eventsRef.current.resolveTarget(frame, point, event.pointerId);
+        const bounds = surfaceRef.current!.getBoundingClientRect();
+        const precisePoint = pxToCellPosition(event, bounds, metrics, CELL_SURFACE_GUARD_CELLS);
+        const candidates = gestureCandidatesForFrame(frame, targetId ? getEventPath(frame.scene, targetId) : [], point, precisePoint);
+        const canSelect = linearSelection && rangeEditable && event.pointerType === "mouse"
+          && !candidates.some((candidate) => candidate.kind === "drag") && !onScrollbar
+          && pressTargetAtPoint(frame, point) === null;
+        const previousAnchor = linearSelectionAnchorRef.current ?? (cellRange ? {
+          point: cellRange.anchor,
+          local: {
+            x: (cellRange.anchor.x + CELL_SURFACE_GUARD_CELLS + 0.5) * metrics.cellWidth,
+            y: (cellRange.anchor.y + CELL_SURFACE_GUARD_CELLS + 0.5) * metrics.cellHeight,
+          },
+        } : null);
+        if (event.shiftKey && canSelect && previousAnchor) {
+          event.preventDefault();
+          linearSelectionAnchorRef.current = previousAnchor;
+          const anchorClient = { x: bounds.left + previousAnchor.local.x, y: bounds.top + previousAnchor.local.y };
+          const headClient = { x: event.clientX, y: event.clientY };
+          setCellRange(previousAnchor.point, point, "linear");
+          notifySelectionGesture("start", "linear", anchorClient, headClient);
+          notifySelectionGesture("end", "linear", anchorClient, headClient);
+          focusFromPointer(event.currentTarget);
+          return;
+        }
+        if (cellRange && rangeEditable) dispatchCellRange({ type: "clear" });
+        linearSelectionAnchorRef.current = canSelect
+          ? { point, local: { x: event.clientX - bounds.left, y: event.clientY - bounds.top } }
+          : null;
+        if (immediate?.type === "focus") dispatch(immediate);
+        linearDragRef.current = canSelect
+          ? { anchor: point, head: point, pointerId: event.pointerId, active: false,
+            anchorClient: { x: event.clientX, y: event.clientY },
+            clientX: event.clientX, clientY: event.clientY }
+          : null;
+        const reorderCandidate = candidates.find((candidate) => candidate.kind === "drag"
+          && frame.tree.nodes.get(candidate.targetId)?.kind === "list-item"
+          && frame.tree.nodes.get(candidate.targetId)?.reorderable);
+        reorderCandidateRef.current = reorderCandidate
+          ? { pointerId: event.pointerId, sourceId: reorderCandidate.targetId }
+          : null;
+        const handlers: CellEventHandlerMap = targetId && candidates.length > 0
+          ? new Map([[targetId, { bubble: (cellEvent) => cellEvent.capturePointer() }]])
+          : new Map();
+        eventsRef.current.dispatch(frame, {
+          type: "pointer-down",
+          pointerId: event.pointerId,
+          point,
+          button: event.button,
+        }, handlers);
+        if (candidates.length > 0) {
+          event.preventDefault();
+          controller.beginPointer(frame, event.pointerId, point, candidates, precisePoint);
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } else if (canSelect) event.currentTarget.setPointerCapture(event.pointerId);
+        if (editor && !editor.disabled && onScrollbar) {
+          adoptTextAreaPreviewScroll(frame, editor.id);
+          dispatch({ type: "focus", targetId: editor.id });
+          focusTextarea(editor.id);
+        } else {
+          focusFromPointer(event.currentTarget);
+        }
+      }}
+      onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
+        if (event.pointerType === "mouse" && event.buttons === 0) setInputModality("pointer");
+        pointerAppearance.move(event);
+        const rangeDrag = rangeDragRef.current;
+        const point = textDragPointFor(event);
+        if (rangeDrag && rangeDrag.pointerId === event.pointerId && point) {
+          rangeDragRef.current = { ...rangeDrag, headClient: { x: event.clientX, y: event.clientY } };
+          setCellRange(rangeDrag.anchor, point);
+          notifySelectionGesture("move", "rectangle", rangeDrag.anchorClient,
+            { x: event.clientX, y: event.clientY });
+          return;
+        }
+        const linearDrag = linearDragRef.current;
+        if (linearDrag && linearDrag.pointerId === event.pointerId && point) {
+          if (!linearDrag.active && Math.hypot(event.clientX - linearDrag.anchorClient.x,
+            event.clientY - linearDrag.anchorClient.y) < 3) return;
+          if (!linearDrag.active) {
+            notifySelectionGesture("start", "linear", linearDrag.anchorClient,
+              { x: event.clientX, y: event.clientY });
+            eventsRef.current.cancel(event.pointerId);
+            gesturesRef.current.cancel(event.pointerId);
+            if (pressRef.current.cancelPointer(event.pointerId)) setPressActiveId(pressRef.current.activeId);
+            syncManipulatingIds();
+          }
+          linearDragRef.current = { ...linearDrag, head: point, active: true,
+            clientX: event.clientX, clientY: event.clientY };
+          setCellRange(linearDrag.anchor, point, "linear");
+          notifySelectionGesture("move", "linear", linearDrag.anchorClient,
+            { x: event.clientX, y: event.clientY });
+          stopLinearScroll();
+          scheduleLinearScroll();
+          return;
+        }
+        const drag = textDragRef.current;
+        if (!frame || !point) return;
+        if (drag && drag.pointerId === event.pointerId) {
+          const layout = frame.textLayouts.get(drag.targetId);
+          if (!layout) return;
+          dispatch({
+            type: "text",
+            targetId: drag.targetId,
+            command: {
+              type: "set-selection",
+              anchor: drag.anchor,
+              head: offsetAtCellPoint(layout, point),
+            },
+          });
+          return;
+        }
+        if (!gesturesRef.current.has(event.pointerId)) return;
+        eventsRef.current.dispatch(frame, {
+          type: "pointer-move",
+          pointerId: event.pointerId,
+          point,
+        });
+        const bounds = surfaceRef.current!.getBoundingClientRect();
+        const signals = controller.movePointer(frame, event.pointerId, point,
+          pxToCellPosition(event, bounds, metrics, CELL_SURFACE_GUARD_CELLS));
+        applyGestureSignals(frame, signals);
+      }}
+      onPointerUp={(event: PointerEvent<HTMLDivElement>) => {
+        const gesture = gesturesRef.current.has(event.pointerId);
+        const point = textDragPointFor(event);
+        try {
+          if (gesture && frame && point) {
+            eventsRef.current.dispatch(frame, {
+              type: "pointer-up",
+              pointerId: event.pointerId,
+              point,
+            });
+            const bounds = surfaceRef.current!.getBoundingClientRect();
+            const signals = controller.endPointer(frame, event.pointerId, point,
+              pxToCellPosition(event, bounds, metrics, CELL_SURFACE_GUARD_CELLS));
+            applyGestureSignals(frame, signals);
+          }
+        } finally {
+          finishPointer(event);
+          pointerAppearance.resume(event);
+        }
+      }}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse" && event.buttons === 0) setInputModality("pointer");
+        pointerAppearance.move(event);
+        const point = textDragPointFor(event);
+        if (frame && point && pressRef.current.movePointer(frame, event.pointerId, point)) {
+          setPressActiveId(pressRef.current.activeId);
+        }
+      }}
+      onPointerLeave={(event) => {
+        pointerAppearance.clear();
+        const point = textDragPointFor(event);
+        if (frame && point && pressRef.current.movePointer(frame, event.pointerId, point)) {
+          setPressActiveId(pressRef.current.activeId);
+        }
+      }}
+      onPointerCancel={(event) => { finishPointer(event); pointerAppearance.clear(); }}
+      onLostPointerCapture={(event) => {
+        const interrupted = eventsRef.current.capturedTarget(event.pointerId) !== null
+          || gesturesRef.current.has(event.pointerId)
+          || textDragRef.current?.pointerId === event.pointerId
+          || rangeDragRef.current?.pointerId === event.pointerId
+          || linearDragRef.current?.pointerId === event.pointerId;
+        finishPointer(event);
+        if (interrupted) pointerAppearance.clear();
+      }}
+      onCopy={(event: ClipboardEvent<HTMLDivElement>) => {
+        if (event.defaultPrevented || !frame) return;
+        const resolved = resolveSelectionCopyText?.(frame.buffer);
+        if (resolved !== undefined) {
+          event.preventDefault();
+          event.clipboardData.setData("text/plain", resolved);
+          return;
+        }
+        if (!cellRange) return;
+        const current = refreshCellRange(frame.buffer, cellRange);
+        if (!current) return;
+        event.preventDefault();
+        event.clipboardData.setData("text/plain", current.text);
+        if (rangeEditable && !equalCellRangeSnapshot(cellRange, current)) {
+          dispatchCellRange({ type: "set", snapshot: current });
+        }
+      }}
+      onFocus={(event) => {
+        const target = event.target;
+        setActiveFocusId(target instanceof HTMLElement
+          ? target.dataset.cellTextEditor ?? target.dataset.cellSemanticId ?? null
+          : null);
+        if (event.target === event.currentTarget && !pointerFocusRequestRef.current) setInputModality("keyboard");
+        surfaceFocus.enter();
+        if (event.target === event.currentTarget) syncDomFocus();
+        if (!frame || focusRef.current.focusedId) return;
+        const targetId = focusRef.current.first(frame.tree);
+        if (targetId) dispatch({ type: "focus", targetId });
+      }}
+      onBlur={onSurfaceBlur}
+      onWheelCapture={() => tooltip.dismiss()}
+      onKeyDown={onKeyDown}
+      onKeyUp={(event) => {
+        if (event.key === "Escape" && tooltip.dismissedId
+          && availableTooltipTargets.has(tooltip.dismissedId)) return;
+        const input = keyInputFromKeyboardEvent(event.nativeEvent);
+        if (event.defaultPrevented || !frame || (event.target instanceof HTMLTextAreaElement && event.key !== "Escape")) return;
+        if (controller.key(frame, input, resolvedFeedback.activationBlinkCount)) event.preventDefault();
+      }}
+      style={{ position: "relative",
+        width: (viewport.width + 2 * CELL_SURFACE_GUARD_CELLS) * metrics.cellWidth,
+        height: (viewport.height + 2 * CELL_SURFACE_GUARD_CELLS) * metrics.cellHeight,
+        outline: "none",
+        pointerEvents: hostedSurface() ? "none" : undefined }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{ display: "block", position: "absolute", left: 0, top: 0,
+          cursor: pointerAppearance.cursor }}
+        aria-hidden="true"
+        data-cell-text={frame ? formatCellBuffer(frame.buffer, { trimEnd: true }) : undefined}
+      />
+      {frame?.overlayPlanes.map((plane) => (
+        <canvas
+          key={plane.rootId}
+          ref={(canvas) => {
+            canvasRef.setOverlay(plane.rootId, canvas);
+          }}
+          aria-hidden="true"
+          data-cell-overlay-root={plane.rootId}
+          data-cell-text={formatCellBuffer(frame.overlayBuffer, {
+            region: plane.bounds,
+            trimEnd: true,
+          })}
+          style={{
+            display: "block",
+            position: "absolute",
+            inset: 0,
+            zIndex: plane.layer,
+            cursor: pointerAppearance.cursor,
+            clipPath: `inset(${plane.bounds.y * metrics.cellHeight}px ${Math.max(
+              0,
+              (frame.scene.overlayViewport.width - plane.bounds.x - plane.bounds.width)
+                * metrics.cellWidth
+            )}px ${Math.max(
+              0,
+              (frame.scene.overlayViewport.height - plane.bounds.y - plane.bounds.height)
+                * metrics.cellHeight
+            )}px ${plane.bounds.x * metrics.cellWidth}px)`,
+          }}
+        />
+      ))}
+      {hostedSurface() && <div ref={registerHitRegion}
+        data-cell-hit-region="" aria-hidden="true" style={{
+        position: "absolute",
+        left: CELL_SURFACE_GUARD_CELLS * metrics.cellWidth,
+        top: CELL_SURFACE_GUARD_CELLS * metrics.cellHeight,
+        width: viewport.width * metrics.cellWidth,
+        height: viewport.height * metrics.cellHeight,
+        pointerEvents: "auto",
+        cursor: pointerAppearance.cursor,
+      }} />}
+      {frame ? (
+        <SemanticDom
+          snapshot={frame.semantics}
+          probeState={{
+            hoveredId,
+            focusedId: frame.semantics.focusedId,
+            activeFocusId: [...frame.tree.nodes.values()].find((node) => node.focusActive)?.id ?? null,
+            pressActiveId,
+            activationFlashId,
+            confirmationPhase: frame.confirmation?.phase ?? null,
+            focusVisible: !!(frame.semantics.focusedId
+              && frame.tree.nodes.get(frame.semantics.focusedId)?.focusVisible),
+            manipulating: manipulatingIds.size > 0,
+          }}
+          onAction={(targetId, action) => {
+            dispatch(commandForInput(
+              { type: "semantic", targetId, action },
+              frame,
+              focusRef.current
+            ));
+          }}
+          showFocus={() => {
+            setInputModality("keyboard");
+          }}
+        />
+      ) : null}
+      {frame ? (
+        <CellTextInputLayer
+          frame={frame}
+          metrics={metrics}
+          guardCells={CELL_SURFACE_GUARD_CELLS}
+          dispatch={dispatch}
+          focusTarget={(targetId) => {
+            if (focusRef.current.focusedId !== targetId) {
+              dispatch({ type: "focus", targetId });
+            }
+          }}
+        />
+      ) : null}
+    </div>
+  );
+};

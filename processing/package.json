@@ -1,0 +1,22 @@
+{
+  "name": "relay",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "python3 build.py && node scripts/build-vendor.mjs",
+    "check": "node --check app.js && node --test test/*.test.mjs && node bin/relay.mjs check --workspace content/relay-demo",
+    "test": "node --test test/*.test.mjs",
+    "relay": "node bin/relay.mjs"
+  },
+  "dependencies": {
+    "torph": "0.1.4"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "markdown-it": "15.0.3"
+  },
+  "description": "An AI newsroom with a CLI for agent content processing.",
+  "bin": {
+    "relay": "bin/relay.mjs"
+  }
+}

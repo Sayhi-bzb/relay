@@ -1,0 +1,87 @@
+@font-face {
+  font-family: "Fusion Pixel 12px Mono latin";
+  src: url("/assets/fonts/fusion-mono/fusion-pixel-12px-monospaced-latin.ttf.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+  font-family: "Fusion Pixel 12px Mono latin", "Maple Mono NF CN", monospace;
+}
+
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--blog-background, #fff); }
+.cell-blog-page { --blog-page-gutter: 16px; --blog-page-top: 24px; --blog-reading-width: 720px;
+  min-height: 100vh; padding-block: var(--blog-page-top) 64px; box-sizing: border-box; }
+.cell-blog-content { padding-top: var(--blog-surface-guard); }
+.cell-blog-layout, .cell-blog-header { display: flow-root; padding-inline: var(--blog-page-gutter); }
+.cell-blog-header { position: sticky; top: 0; z-index: 3; overflow: clip;
+  background: var(--blog-background, #fff); }
+.cell-blog-header-ink { position: relative; margin-block: calc(-1 * var(--blog-surface-guard)); }
+.cell-blog-header-ink, .cell-blog-host { max-width: var(--blog-reading-width); margin-inline: auto; }
+.cell-blog-host { position: relative; margin-top: var(--blog-surface-guard); }
+.cell-blog-host--post { margin-top: calc(-1 * var(--blog-surface-guard)); }
+.cell-blog-host[data-relay-reading] { overflow-anchor: none; }
+.cell-blog-surface { width: 100%; }
+.cell-blog-math-layer { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
+.cell-blog-icon-layer { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
+.cell-blog-icon-ink { position: absolute; display: block; pointer-events: none;
+  mask-size: contain; mask-position: center; mask-repeat: no-repeat;
+  -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat; }
+.cell-blog-math-ink { display: inline-block; font-size: 15px; line-height: normal; vertical-align: baseline;
+  white-space: nowrap; z-index: 1; }
+.cell-blog-math-ink .katex-display { margin: 0; }
+.cell-blog-math-measure { position: fixed; left: -100000px; top: 0; visibility: hidden;
+  white-space: nowrap; font-size: 15px; line-height: normal; pointer-events: none; }
+.cell-blog-toc { min-width: 0; }
+.cell-blog-media-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: rgb(0 0 0 / 65%); }
+.cell-blog-media-viewer { max-width: 90vw; max-height: 85vh; overflow: hidden; background: var(--blog-background, #fff); }
+@media (min-width: 1240px) {
+  .cell-blog-toc { position: fixed; right: max(16px, 100vw - 100%); box-sizing: border-box; overflow: clip;
+    top: calc(var(--blog-page-top) + var(--blog-surface-guard) + var(--blog-header-height)); bottom: 24px; }
+  .cell-blog-toc-surface { width: calc(100% + 9px); }
+}
+@media (max-width: 560px) { .cell-blog-page { --blog-page-gutter: 8px; --blog-page-top: 12px; padding-bottom: 48px; } }
+
+.relay-morph-clip { position: absolute; overflow: hidden; contain: layout paint; pointer-events: none; z-index: 2; }
+@media (prefers-reduced-motion: reduce) { .relay-morph-clip { display: none; } }
+
+.relay-keyboard-target { position: absolute; pointer-events: none; border: 0; padding: 0; background: transparent; color: transparent; }
+.relay-keyboard-target:focus-visible { outline: 1px solid var(--blog-foreground, #888); outline-offset: 2px; }
+.relay-inline-link { position: absolute; inset: 0; pointer-events: none; }
+.relay-inline-link > span { position: absolute; pointer-events: auto; cursor: pointer; }
+.relay-inline-link:focus-visible > span { outline: 1px solid var(--blog-foreground, #888); }
+.cell-blog-article-image { position: absolute; display: grid; place-items: center; overflow: hidden;
+  border: 0; padding: 0; background: transparent; color: inherit; font: inherit; cursor: zoom-in; }
+.cell-blog-article-image img { display: block; max-width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.cell-blog-article-image span { padding: 8px; text-align: center; overflow-wrap: anywhere; }
+.cell-blog-article-image:focus-visible { outline: 1px solid currentColor; outline-offset: -1px; }
+.cell-blog-image-carousel { position: absolute; }
+.cell-blog-image-track { position: relative; display: flex; height: 100%; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x proximity; overscroll-behavior-x: contain; scrollbar-width: none; }
+.cell-blog-image-track > .cell-blog-article-image { position: relative; flex: 0 0 auto; min-width: 0;
+  scroll-snap-align: start; border-radius: 6px; background: color-mix(in srgb, currentColor 7%, transparent); }
+.cell-blog-image-control { position: absolute; overflow: clip; }
+.cell-blog-image-control--previous { left: 0; }
+.cell-blog-image-control--next { right: 0; }
+@media (hover: hover) {
+  .cell-blog-image-carousel:not(:hover):not(:focus-within) .cell-blog-image-control { opacity: 0; pointer-events: none; }
+}
+.cell-blog-image-viewer { position: fixed; inset: 0; box-sizing: border-box; width: 100%; height: 100dvh;
+  max-width: none; max-height: none; margin: 0; border: 0; padding: 0; overflow: hidden; background: transparent; color: #fff; }
+.cell-blog-image-viewer[open] { display: grid; place-items: center; }
+.cell-blog-image-viewer::backdrop { background: rgb(0 0 0 / 0%); backdrop-filter: blur(0px);
+  transition: background-color 320ms ease-in-out, backdrop-filter 320ms ease-in-out; }
+.cell-blog-image-viewer[data-image-settled]::backdrop { background-color: rgb(0 0 0 / 55%); backdrop-filter: blur(5px); }
+@media (prefers-reduced-motion: reduce) { .cell-blog-image-viewer::backdrop { transition: none; } }
+.cell-blog-image-viewer figure { width: min(88vw, 1280px); margin: 0; display: grid; }
+.cell-blog-image-stage { display: grid; place-items: center; min-width: 0; min-height: 0; }
+.cell-blog-image-stage img { display: block; max-width: 100%; max-height: 72dvh; width: auto; height: auto; object-fit: contain; transform-origin: top left; }
+@media (max-width: 560px) { .cell-blog-image-viewer figure { width: 94vw; } }
+.cell-blog-image-stage a { color: inherit; }
+.cell-blog-image-caption { justify-self: center; display: grid; box-sizing: border-box; width: min(100%, 72ch); max-height: 14dvh; overflow: auto;
+  padding: 12px 4px 0; font-size: 15px; line-height: 1.4; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cell-blog-image-caption > span { grid-area: 1 / 1; }
+#article-image-caption, .cell-blog-caption-unprinted { visibility: hidden; }

@@ -1,0 +1,9 @@
+Example Release 1.0 lets a reader pin a note, browse saved releases and recover a draft.
+Pin a note
+If you keep returning to a note, click Pin to keep it at the top of your list.
+Browse releases
+Choose a product, then open a release to see what changed.
+Recover a draft
+A saved draft stays available when you close the editor and return later.
+Reuse a link
+Copy a release link to share the original source with a teammate.

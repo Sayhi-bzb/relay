@@ -1,0 +1,6 @@
+{
+  "category": "Coding Agent",
+  "allowedKinds": ["release", "changelog"],
+  "includePrereleases": false,
+  "prereleasePattern": "(?:^|[^a-z])(?:alpha|beta|rc|preview|pre[- ]?release|release[- ]candidate|nightly|canary|snapshot|dev|experimental)(?=$|[^a-z])"
+}

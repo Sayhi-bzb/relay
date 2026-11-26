@@ -1,0 +1,14 @@
+{
+  "image": "localhost/agent-training-lab:pi-1.6.0",
+  "model": "deepseek/deepseek-flash:high",
+  "workdir": "/work/relay/reading-lab",
+  "taskPath": "/work/article",
+  "sharedPath": "/work/relay/reading-lab/content",
+  "sharedDirectory": "content",
+  "requiredFiles": ["source.md", "processed.json"],
+  "credentials": ["DEEPSEEK_API_KEY"],
+  "tools": ["read", "bash", "edit", "write"],
+  "skills": ["/work/relay/.agents/skills/relay/SKILL.md"],
+  "systemPrompt": "You are an editorial agent working on Relay article drafts. Follow the user’s instructions for this task.",
+  "appendSystemPrompt": "Use the Relay CLI to inspect the active article workspace and save its reading views."
+}

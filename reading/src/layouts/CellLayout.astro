@@ -1,0 +1,32 @@
+---
+import Head from "../components/Head.astro";
+import CellBlogApp from "../components/cell/CellBlogApp";
+import type { BlogPageModel } from "../components/cell/model";
+import "../styles/cell.css";
+
+interface Props { model: BlogPageModel; }
+const { model } = Astro.props;
+---
+
+<!doctype html>
+<html lang={model.lang}>
+  <head>
+    <Head title={model.title} description={model.description} lang={model.lang} type={model.kind === "post" ? "article" : "website"} />
+    {model.kind === "post" && <script is:inline>
+      if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+        const previousRestoration = history.scrollRestoration;
+        history.scrollRestoration = 'manual';
+        if (location.hash.startsWith('#section-')) {
+          history.replaceState(history.state, '', location.pathname + location.search);
+        }
+        window.addEventListener('pageshow', () => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+          history.scrollRestoration = previousRestoration;
+        }, { once: true });
+      }
+    </script>}
+  </head>
+  <body>
+    <CellBlogApp client:only="react" model={model} />
+  </body>
+</html>

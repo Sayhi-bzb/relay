@@ -1,0 +1,18 @@
+[
+  {"name":"stable version","title":"v1.2.3","metadata":{"prerelease":false},"stable":true},
+  {"name":"alpha despite incorrect provider flag","title":"v1.2.3-alpha.1","metadata":{"prerelease":false},"stable":false},
+  {"name":"uppercase beta","title":"v1.2.3-BETA2","stable":false},
+  {"name":"release candidate","title":"v1.2.3-rc.1","stable":false},
+  {"name":"preview","title":"v1.2.3-preview.4","stable":false},
+  {"name":"nightly tag","title":"Release","metadata":{"tagName":"nightly-2026-11-14"},"stable":false},
+  {"name":"canary channel","title":"v1.2.3","metadata":{"channel":"canary"},"stable":false},
+  {"name":"development build","title":"v1.2.3-dev.1","stable":false},
+  {"name":"snapshot","title":"v1.2.3-snapshot","stable":false},
+  {"name":"explicit prerelease flag","title":"v1.2.3","metadata":{"prerelease":true},"stable":false},
+  {"name":"draft","title":"v1.2.3","metadata":{"draft":true},"stable":false},
+  {"name":"version label in release URL","title":"Release","url":"https://github.com/org/repo/releases/tag/v1.2.3-beta.1","stable":false},
+  {"name":"stable tag","title":"Release","metadata":{"tagName":"v1.2.3"},"stable":true},
+  {"name":"alpha as a substring is not a stage","title":"Fix alphabetical sorting","stable":true},
+  {"name":"dev as a substring is not a stage","title":"Developer improvements","stable":true},
+  {"name":"unrelated metadata is not scanned","title":"v1.2.3","metadata":{"notes":"fix beta feature"},"stable":true}
+]

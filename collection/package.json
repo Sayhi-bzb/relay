@@ -1,0 +1,17 @@
+{
+  "name": "ai-data-terminal",
+  "version": "0.2.0",
+  "private": true,
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @aidt/worker dev",
+    "worker": "pnpm --filter @aidt/worker start",
+    "worker:doctor": "pnpm --filter @aidt/worker doctor",
+    "typecheck": "pnpm --filter @aidt/worker typecheck",
+    "test": "pnpm --filter @aidt/worker test && python3 -m unittest discover -s apps/worker/test -p 'test_obsidian.py'",
+    "check": "pnpm typecheck && pnpm test"
+  }
+}

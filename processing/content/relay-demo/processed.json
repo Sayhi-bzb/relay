@@ -1,0 +1,65 @@
+{
+  "source": "source.md",
+  "article": {
+    "brief": {
+      "text": "**你可以置顶常用笔记，也能找回编辑到一半的草稿。** 版本更新可按产品浏览，并可分享原文链接。",
+      "source_version": 1
+    },
+    "interpretation": {
+      "text": "每天都要回看的笔记，可以先置顶。关掉编辑器再回来时，已经保存的草稿还在。\n\n> 你可以先写一半，关闭编辑器，稍后回来继续完成同一份草稿。\n\n**两条日常路径**\n├─ **处理笔记** → 置顶或继续写草稿\n└─ **查看更新** → 按产品打开版本，再分享原文",
+      "source_version": 1
+    }
+  },
+  "chunks": {
+    "c0001": {
+      "brief": {
+        "text": "新版把笔记和发布说明放在一处。",
+        "source_version": 1
+      },
+      "interpretation": {
+        "text": "你可以快速找到常用笔记，然后打开某个产品的发布说明。",
+        "source_version": 1
+      }
+    },
+    "c0002": {
+      "brief": {
+        "text": "点 **Pin**，把常用笔记移到列表顶部。",
+        "source_version": 1
+      },
+      "interpretation": {
+        "text": "如果你每天都要回看同一份清单，点 **Pin** 后就能从列表顶部打开它。",
+        "source_version": 1
+      }
+    },
+    "c0003": {
+      "brief": {
+        "text": "按产品查看发布说明。",
+        "source_version": 1
+      },
+      "interpretation": {
+        "text": "先选择产品，再打开需要阅读的版本。",
+        "source_version": 1
+      }
+    },
+    "c0004": {
+      "brief": {
+        "text": "重新打开编辑器可继续已保存的草稿。",
+        "source_version": 1
+      },
+      "interpretation": {
+        "text": "> A saved draft stays available when you close the editor and return later.",
+        "source_version": 1
+      }
+    },
+    "c0005": {
+      "brief": {
+        "text": "复制版本链接即可分享原文。",
+        "source_version": 1
+      },
+      "interpretation": {
+        "text": "把原文链接发给同事，对方可以从同一份发布说明核对变化。",
+        "source_version": 1
+      }
+    }
+  }
+}

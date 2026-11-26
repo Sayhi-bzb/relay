@@ -1,0 +1,25 @@
+---
+import CellLayout from '../../layouts/CellLayout.astro';
+import { getSources, sourceUrl, type Source } from '../../lib/sources';
+import { formatDate } from '../../data/site';
+import { compileCellDocument } from '../../lib/cell-document';
+import articles from '../../data/relay/index.json';
+import { prepareRelay, type RelayExport } from '../../lib/relay-source';
+import type { BlogPageModel } from '../../components/cell/model';
+
+export async function getStaticPaths() {
+  return (await getSources()).map(source => ({ params: { slug: source.slug }, props: { source } }));
+}
+
+const { source }: { source: Source } = Astro.props;
+const relay = (articles as Record<string, RelayExport>)[source.data.source_url];
+const model: BlogPageModel = {
+  kind: 'post', lang: source.data.lang, title: source.data.title, description: source.data.description,
+  date: formatDate(source.data.published_at), postKind: 'source', sourceUrl: source.data.source_url,
+  publisher: source.data.publisher, author: source.data.author,
+  document: compileCellDocument(source.body, sourceUrl(source), source.id, source.data.image_sizes),
+  ...(relay ? { relay: prepareRelay(relay, source.body, source.data.source_url, sourceUrl(source), source.data.image_sizes) } : {}),
+};
+---
+
+<CellLayout model={model} />

@@ -1,0 +1,11 @@
+.git
+.agents
+.codex
+**/.env
+**/.next
+**/.tmp
+**/dist
+**/media
+**/node_modules
+coverage
+public

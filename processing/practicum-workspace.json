@@ -1,0 +1,14 @@
+{
+  "image": "localhost/relay-workspace:pi-1.6.0",
+  "model": "deepseek/deepseek-flash:high",
+  "workdir": "/work/task",
+  "taskPath": "/work/task",
+  "sharedPath": "/work/shared",
+  "requiredFiles": ["source.md", "processed.json"],
+  "credentials": ["DEEPSEEK_API_KEY"],
+  "tools": ["read", "bash", "edit", "write"],
+  "skills": ["/work/tools/relay/.agents/skills/relay/SKILL.md"],
+  "systemPrompt": "You are an editorial agent working on Relay article drafts. Follow the user's instructions for this task.",
+  "appendSystemPrompt": "Work on the current article in /work/task using Relay CLI. Read finished articles under /work/shared only when useful. Use stable article IDs to reference them.",
+  "smoke": ["/bin/sh", "-ec", "test \"$(pwd)\" = /work/task; test -r /work/tools/relay/.agents/skills/relay/SKILL.md; relay read --unit article --json >/dev/null; probe=$(mktemp /work/task/.relay-smoke.XXXXXX); rm -- \"$probe\""]
+}

@@ -1,0 +1,20 @@
+---
+import CellLayout from '../../layouts/CellLayout.astro';
+import { getProducts, getSources } from '../../lib/sources';
+import type { BlogPageModel } from '../../components/cell/model';
+
+export async function getStaticPaths() {
+  return getProducts(await getSources()).map(product => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+const model: BlogPageModel = {
+  kind: 'listing', lang: 'zh-CN', title: product.name, description: `${product.name} 版本更新`,
+  posts: product.posts, emptyText: '暂无文章',
+};
+---
+
+<CellLayout model={model} />

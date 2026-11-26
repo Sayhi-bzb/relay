@@ -1,0 +1,38 @@
+{
+  "name": "@aidt/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/cli.ts run",
+    "start": "tsx src/cli.ts run",
+    "doctor": "tsx src/cli.ts doctor",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm test"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.52",
+    "@mozilla/readability": "^0.6.0",
+    "ai": "^7.0.85",
+    "better-sqlite3": "^12.4.1",
+    "commander": "^15.0.0",
+    "fast-xml-parser": "^5.2.5",
+    "jsdom": "^26.1.0",
+    "octokit": "^5.0.3",
+    "p-limit": "^7.1.1",
+    "rss-parser": "^3.13.0",
+    "tsx": "^4.20.5",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.18.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

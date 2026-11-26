@@ -1,0 +1,52 @@
+{
+  "name": "relay-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "python3 scripts/sync-source.py && node scripts/sync-relay.mjs",
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 127.0.0.1 --port 4321",
+    "prebuild": "python3 scripts/sync-source.py && node scripts/sync-relay.mjs",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 127.0.0.1 --port 4321",
+    "test": "python3 -m unittest discover -s test -p 'test_*.py' && node --test test/*.test.mjs",
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check --minimumFailingSeverity error",
+    "pretest": "python3 scripts/sync-source.py && node scripts/sync-relay.mjs"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.4.2",
+    "@astrojs/rss": "^4.0.12",
+    "@chardesk/cell-core": "0.5.3",
+    "@chardesk/font-maple": "0.5.3",
+    "@chardesk/fonts": "0.5.3",
+    "@chardesk/protocol": "0.5.3",
+    "@chardesk/rendering": "0.5.3",
+    "@codemirror/state": "^6.7.6",
+    "@react-stately/collections": "^3.13.1",
+    "@react-stately/list": "^3.14.1",
+    "@shikijs/core": "^3.23.0",
+    "@shikijs/engine-javascript": "^3.23.0",
+    "@shikijs/langs": "^3.23.0",
+    "astro": "^5.15.7",
+    "hast-util-from-html": "^2.0.3",
+    "katex": "^0.17.0",
+    "marked": "^16.4.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "yoga-layout": "^3.2.1",
+    "torph": "0.1.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  },
+  "description": "Relay source reading with the Cell Blog frontend."
+}

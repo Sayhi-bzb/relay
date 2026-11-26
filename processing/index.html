@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>阅读</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="article-data.js" defer></script>
+  <script src="vendor/torph.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <section id="reader" aria-label="阅读内容">
+      <div class="item-header">
+        <button id="source-button" type="button">原文</button>
+      </div>
+      <div id="content"></div>
+    </section>
+  </main>
+  <div id="announcement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

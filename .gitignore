@@ -1,0 +1,26 @@
+.DS_Store
+node_modules/
+.pnpm-store/
+.astro/
+dist/
+__pycache__/
+*.py[cod]
+*.log
+.private/
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+/AI 新闻工作库/
+/.serena/cache/
+/.serena/memories/
+/.serena/project.local.yml
+
+.relay/
+.history/
+*.jsonl
+/processing/article-data.js
+/processing/data/article.json
